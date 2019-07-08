@@ -1,0 +1,46 @@
+---
+#
+# Internal Service to scrape metrics from Alcide Advisor
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubemon-metrics
+  namespace: alcide
+  labels:
+    name: kubemon-metrics
+    tier: monitor
+    metrics: kubemon
+spec:
+  type: ClusterIP
+  selector:
+    app: kubemon
+  ports:
+    - name: metrics
+      port: 6666
+      targetPort: 6666
+      protocol: TCP
+---
+
+#
+# The Service Monitor 
+#
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: kubemon
+    release: monitoring
+  name: kubemon
+  #namespace: monitoring
+spec:
+  endpoints:
+    - interval: 30s
+      path: /metrics
+      port: metrics
+  namespaceSelector:
+    matchNames:
+      - alcide
+  selector:
+    matchLabels:
+      app: kubemon
