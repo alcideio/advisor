@@ -32,10 +32,10 @@ metadata:
     app: kubemon
     release: monitoring
   name: kubemon
-  #namespace: monitoring
+  namespace: monitoring #Modify to match the namespace you installed your Prometheus Operator
 spec:
   endpoints:
-    - interval: 30s
+    - interval: 30s #Modify to match your scan schedule
       path: /metrics
       port: metrics
   namespaceSelector:
