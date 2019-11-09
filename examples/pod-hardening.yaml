@@ -1,0 +1,99 @@
+#
+# In this example: Echo Server hardening example
+# - Pod is running an Echo server ... All process capabilities are dropped except NET_BIND_SERVICE which allow to bind to a socket
+# - Pod is running as none root, with user id > 10000
+# - Pod is running with ReadOnly file system which means the container is immutable 
+# - Pod is writing to file system using volume mount
+#
+#   kubectl describe -n example deploy/hardening-example
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hardening-example
+  namespace: example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+      name: hardening-example
+    spec:
+      containers:
+      - name: myapp
+        # change your container image    
+        image: cjimti/go-echo:latest
+        imagePullPolicy: IfNotPresent
+
+        # Our liveness & readiness probes, and echo port
+        ports:
+          - name: tcp-echo-port
+            containerPort: 8080
+
+        # Container Security Context ... reduce process permissions
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - all
+          runAsNonRoot: true
+          runAsUser: 10001
+
+          # Enable this while you carefully examine the application functionality
+          readOnlyRootFilesystem: true
+
+        env:
+        - name: TCP_PORT
+          value: "8080"
+        - name: ALCIDE_ADVISOR_SCRATCHPAD_DIR
+          value: "/var/run"
+
+        # Mount Read/Write space
+        volumeMounts:
+        - name: scratchpad-volume
+          mountPath: /myapp
+
+        # Define resource limits or requests if you know them
+        resources:
+          limits:
+            cpu: 300m
+            memory: 500Mi
+          # requests:
+          #   cpu: 300m
+          #   memory: 500Mi
+
+        # Define liveness & readiness probes       
+        livenessProbe:
+          # Use an application indicative probe ... socket check is bare minimum check 
+          tcpSocket:
+            port: tcp-echo-port
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 80
+        #   initialDelaySeconds: 180
+        #   periodSeconds: 3 
+
+      # Use private image registries to pull images
+      imagePullSecrets:
+      - name: registry.alcide.io
+      restartPolicy: Always
+      
+      # Kubernetes API Server Access with Service Account
+      #serviceAccountName: alcide-k8s-monitor
+      
+      # Disable Kubernetes API Server Access - even to the discovery APIs
+      automountServiceAccountToken: false
+
+      volumes:
+      # Use emptyDir volumes to enable Read/Write space, even if container runs with Read Only file system
+      - name: scratchpad-volume
+        emptyDir: {}  
