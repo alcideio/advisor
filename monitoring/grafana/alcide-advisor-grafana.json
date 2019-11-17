@@ -15,7 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 12,
+  "id": 25,
+  "iteration": 1574025836661,
   "links": [],
   "panels": [
     {
@@ -29,6 +30,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
+      "datasource": "$datasource",
       "decimals": 0,
       "format": "none",
       "gauge": {
@@ -55,6 +57,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -75,11 +78,8 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "avg(alcide_advisor_total_count_by_severity{severity=\"critical\"}) without (pod)",
-          "format": "time_series",
+          "expr": "alcide_advisor_total_count_by_severity{severity=\"critical\",profileId=\"$profile\"}",
           "hide": false,
-          "instant": false,
-          "intervalFactor": 1,
           "refId": "A"
         }
       ],
@@ -99,16 +99,111 @@
       "valueName": "current"
     },
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$datasource",
+      "decimals": 0,
+      "fill": 6,
+      "fillGradient": 6,
+      "gridPos": {
+        "h": 6,
+        "w": 18,
+        "x": 6,
+        "y": 0
+      },
+      "id": 16,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 400,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "6.4.3",
+      "pointradius": 0.5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": true,
+      "targets": [
+        {
+          "expr": "sum by (k8s_namespace) (alcide_advisor_resource_severity_count{profileId=\"$profile\", severity=~\"critical|high\"})",
+          "hide": false,
+          "legendFormat": "{{ k8s_namespace }}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Severity By Namespace (High, Critical)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "cumulative"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": 0,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "decimals": null,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
       "cacheTimeout": null,
       "colorBackground": false,
       "colorPostfix": false,
       "colorPrefix": false,
       "colorValue": true,
       "colors": [
-        "#E0B400",
+        "#FF7383",
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
+      "datasource": "$datasource",
       "decimals": 0,
       "format": "none",
       "gauge": {
@@ -121,8 +216,8 @@
       "gridPos": {
         "h": 3,
         "w": 6,
-        "x": 6,
-        "y": 0
+        "x": 0,
+        "y": 3
       },
       "id": 13,
       "interval": null,
@@ -141,6 +236,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -161,11 +257,8 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "avg(alcide_advisor_total_count_by_severity{severity=\"high\"}) without (pod)",
-          "format": "time_series",
+          "expr": "alcide_advisor_total_count_by_severity{severity=\"high\",profileId=\"$profile\"}",
           "hide": false,
-          "instant": false,
-          "intervalFactor": 1,
           "refId": "A"
         }
       ],
@@ -191,10 +284,11 @@
       "colorPrefix": false,
       "colorValue": true,
       "colors": [
-        "#1F60C4",
+        "#F2CC0C",
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
+      "datasource": "$datasource",
       "decimals": 0,
       "format": "none",
       "gauge": {
@@ -207,8 +301,8 @@
       "gridPos": {
         "h": 3,
         "w": 6,
-        "x": 12,
-        "y": 0
+        "x": 0,
+        "y": 6
       },
       "id": 14,
       "interval": null,
@@ -227,6 +321,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -247,11 +342,8 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "avg(alcide_advisor_total_count_by_severity{severity=\"low\"}) without (pod)",
-          "format": "time_series",
+          "expr": "alcide_advisor_total_count_by_severity{severity=\"medium\",profileId=\"$profile\"}",
           "hide": false,
-          "instant": false,
-          "intervalFactor": 1,
           "refId": "A"
         }
       ],
@@ -271,306 +363,19 @@
       "valueName": "current"
     },
     {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorPostfix": false,
-      "colorPrefix": false,
-      "colorValue": true,
-      "colors": [
-        "#56A64B",
-        "rgba(237, 129, 40, 0.89)",
-        "#299c46"
-      ],
-      "decimals": 0,
-      "format": "none",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": false
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 6,
-        "x": 18,
-        "y": 0
-      },
-      "id": 5,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "avg(alcide_advisor_total_count_by_severity{severity=\"low\"}) without (pod)",
-          "format": "time_series",
-          "hide": false,
-          "instant": false,
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "100",
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Low",
-      "type": "singlestat",
-      "valueFontSize": "200%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "aliasColors": {
-        "Severity: critical": "dark-red",
-        "Severity: high": "dark-yellow",
-        "Severity: medium": "dark-blue",
-        "alcide_advisor_total_count_by_severity{endpoint=\"metrics\",instance=\"172.17.0.12:6666\",job=\"kubemon-metrics\",namespace=\"alcide\",pod=\"kubemon-d4d54484b-zzbm2\",service=\"kubemon-metrics\",severity=\"critical\",source=\"advisor\"}": "red",
-        "alcide_advisor_total_count_by_severity{endpoint=\"metrics\",instance=\"172.17.0.12:6666\",job=\"kubemon-metrics\",namespace=\"alcide\",pod=\"kubemon-d4d54484b-zzbm2\",service=\"kubemon-metrics\",severity=\"low\",source=\"advisor\"}": "dark-blue",
-        "alcide_advisor_total_count_by_severity{endpoint=\"metrics\",instance=\"172.17.0.12:6666\",job=\"kubemon-metrics\",namespace=\"alcide\",pod=\"kubemon-d4d54484b-zzbm2\",service=\"kubemon-metrics\",severity=\"medium\",source=\"advisor\"}": "semi-dark-purple"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "decimals": 0,
-      "fill": 4,
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 3
-      },
-      "hideTimeOverride": true,
-      "id": 7,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": true,
-        "max": true,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "sideWidth": 600,
-        "sort": null,
-        "sortDesc": null,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null as zero",
-      "paceLength": 10,
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "stack": true,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "max(alcide_advisor_total_count_by_severity{severity=~\"critical|high|medium\"}) without (pod)",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "Severity: {{ severity}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Severity Totals",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "Critical | daemonset.extensions/v1beta1  |  monitoring-prometheus-node-exporter/monitoring": "dark-red"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "decimals": 0,
-      "fill": 1,
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 9
-      },
-      "id": 11,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
-        "max": true,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "sideWidth": 600,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null as zero",
-      "paceLength": 10,
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "stack": true,
-      "steppedLine": true,
-      "targets": [
-        {
-          "expr": "max(alcide_advisor_resource_severity_count{severity=~\"critical\"} > 0) without (pod)\n",
-          "format": "time_series",
-          "hide": false,
-          "instant": false,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "Critical | {{k8s_apikind}}.{{k8s_apigroup}}/{{k8s_apiversion}}  |  {{k8s_name}}/{{ k8s_namespace}}",
-          "refId": "A"
-        },
-        {
-          "expr": "max(alcide_advisor_resource_severity_count{severity=~\"high\"} > 0) without (pod)\n",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "High |  {{k8s_apikind}}.{{k8s_apigroup}}/{{k8s_apiversion}}  |  {{k8s_name}}/{{ k8s_namespace}}",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "(Critical & High) Severity Count Per Resource",
-      "tooltip": {
-        "shared": true,
-        "sort": 1,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "$datasource",
       "decimals": 0,
       "fill": 1,
+      "fillGradient": 4,
       "gridPos": {
-        "h": 5,
-        "w": 24,
-        "x": 0,
-        "y": 15
+        "h": 6,
+        "w": 18,
+        "x": 6,
+        "y": 6
       },
       "id": 9,
       "legend": {
@@ -581,7 +386,7 @@
         "min": false,
         "rightSide": true,
         "show": true,
-        "sideWidth": 600,
+        "sideWidth": 400,
         "sort": "max",
         "sortDesc": true,
         "total": false,
@@ -591,20 +396,23 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "paceLength": 10,
       "percentage": false,
+      "pluginVersion": "6.4.3",
       "pointradius": 0.5,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
+      "spaceLength": 10,
       "stack": true,
       "steppedLine": true,
       "targets": [
         {
-          "expr": "max(alcide_advisor_total_by_check) without (pod)",
-          "format": "time_series",
+          "expr": "max(alcide_advisor_total_by_check{profileId=\"$profile\"}) without (pod)",
           "hide": false,
-          "intervalFactor": 1,
           "legendFormat": "{{ check_title}}",
           "refId": "A"
         }
@@ -649,19 +457,249 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorPostfix": false,
+      "colorPrefix": false,
+      "colorValue": true,
+      "colors": [
+        "#8AB8FF",
+        "rgba(237, 129, 40, 0.89)",
+        "#299c46"
+      ],
+      "datasource": "$datasource",
+      "decimals": 0,
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": false
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 9
+      },
+      "id": 5,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "alcide_advisor_total_count_by_severity{severity=\"low\",profileId=\"$profile\"}",
+          "hide": false,
+          "refId": "A"
+        }
+      ],
+      "thresholds": "100",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Low",
+      "type": "singlestat",
+      "valueFontSize": "200%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {
+        "Critical | daemonset.extensions/v1beta1  |  monitoring-prometheus-node-exporter/monitoring": "dark-red"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$datasource",
+      "decimals": 0,
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 11,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 600,
+        "sort": "max",
+        "sortDesc": false,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "6.4.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": true,
+      "targets": [
+        {
+          "expr": "max(alcide_advisor_resource_severity_count{severity=~\"critical|high\", profileId=\"$profile\"} > 0) without (pod)",
+          "hide": false,
+          "legendFormat": "{{severity}} | {{k8s_apikind}}.{{k8s_apigroup}}/{{k8s_apiversion}}  |  {{k8s_name}}/{{ k8s_namespace}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "(Critical & High) Severity Count Per Resource",
+      "tooltip": {
+        "shared": true,
+        "sort": 1,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
-  "schemaVersion": 18,
+  "refresh": false,
+  "schemaVersion": 20,
   "style": "dark",
   "tags": [
     "security",
     "alcide"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "text": "prometheus",
+          "value": "prometheus"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "d61d4ab0-a9e2-419b-9013-cbd4fa272644",
+          "value": "d61d4ab0-a9e2-419b-9013-cbd4fa272644"
+        },
+        "datasource": "$datasource",
+        "definition": "label_values(alcide_advisor_profile_id{source=\"advisor\"}, profileId)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "profile",
+        "multi": false,
+        "name": "profile",
+        "options": [],
+        "query": "label_values(alcide_advisor_profile_id{source=\"advisor\"}, profileId)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 2,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
-    "from": "now/w",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
@@ -692,5 +730,5 @@
   "timezone": "",
   "title": "Alcide Kubernetes Advisor",
   "uid": "1LPNmSSWz",
-  "version": 43
+  "version": 9
 }
