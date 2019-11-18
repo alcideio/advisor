@@ -60,7 +60,7 @@ spec:
       - alcide
   selector:
     matchLabels:
-      app: kubemon
+      name: kubemon-metrics
 ```
 
 To install run:
