@@ -6,7 +6,7 @@ Alcide Kubernetes Advisor, when deployed into the cluster, performs periodic sca
 
 ## Create Free Account
 
-To test the full blown capabilities of **Alcide Kubernetes Advisor** with a risk-free account. [signup here](https://www.alcide.io/advisor-free-trial/)
+To test the full blown capabilities of **Alcide Kubernetes Advisor** claim your 'Free Forever' account [here](https://www.alcide.io/advisor-free-trial/)
 
 ## Installation
 
