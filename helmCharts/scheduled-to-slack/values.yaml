@@ -1,0 +1,12 @@
+namespace: alcide-kube-advisor
+cronSchedule: "* * * * *"
+serviceAccount: kube-advisor
+clusterRole: kube-advisor-clusterRole
+clusterRoleBinding: kube-advisor-clusterRoleBinding
+
+slack:
+  channel: <Your_Slack_Channel>
+  token: <Your_Slack_API_Token>
+
+kubeconfig:
+  contextName: default-context

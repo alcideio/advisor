@@ -1,0 +1,85 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: advisorjob
+  namespace: {{ .Values.namespace }}
+spec:
+  schedule: {{ .Values.cronSchedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.serviceAccount }}
+          initContainers:
+          - name: generate-kubeconfig
+            image: alcide/devops-assignment:latest
+            command: ["/bin/sh","-c"]
+            args:
+              - |
+                /set_cluster_context.sh $(CLUSTER_CONTEXT_NAME) $(NAMESPACE_NAME) $(SERVICEACCOUNT_NAME);
+                cp /etc/ssl/certs/ca-certificates.crt /certs/
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - all
+              runAsNonRoot: true
+              runAsUser: 10001
+              readOnlyRootFilesystem: true
+            env:
+              - name: CLUSTER_CONTEXT_NAME
+                value: {{ .Values.kubeconfig.contextName }}
+              - name: NAMESPACE_NAME
+                value: {{ .Values.namespace }}
+              - name: SERVICEACCOUNT_NAME
+                value: {{ .Values.serviceAccount }}
+            volumeMounts:
+            - name: kube-config-volume
+              mountPath: /.kube
+            - name: ca-certificates
+              mountPath: /certs
+          containers:
+          - name: advisor-scan
+            image: alcide/advisor:stable
+            args:
+              - --eula-sign
+              - validate
+              - cluster
+              - --cluster-context
+              - $(CLUSTER_CONTEXT_NAME)
+              - --slack-api-token
+              - $(SLACK_API_TOKEN)
+              - --slack-channel
+              - $(SLACK_CHANNEL)
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - all
+              runAsNonRoot: true
+              runAsUser: 10001
+              readOnlyRootFilesystem: true
+            env:
+              - name: KUBECONFIG
+                value: "/kube/config"
+              - name: CLUSTER_CONTEXT_NAME
+                value: {{ .Values.kubeconfig.contextName }}
+              - name: SLACK_API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: slackapitoken
+                    key: token
+              - name: SLACK_CHANNEL
+                value: {{ .Values.slack.channel }}
+            volumeMounts:
+            - name: kube-config-volume
+              mountPath: /kube
+            - name: ca-certificates
+              mountPath: /etc/ssl/certs
+          volumes:
+            - name: kube-config-volume
+              emptyDir: {}
+            - name: ca-certificates
+              emptyDir: {}
+          restartPolicy: OnFailure
