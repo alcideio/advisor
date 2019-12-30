@@ -7,3 +7,6 @@ rules:
   - apiGroups: ["*"]
     resources: ["*"]
     verbs: ["get", "list", "proxy"]
+  - apiGroups: ["authorization.k8s.io"]
+    resources: ["subjectaccessreviews"]
+    verbs: ["create"]
