@@ -1,5 +1,8 @@
 namespace: alcide-kube-advisor
 cronSchedule: "* * * * *"
+initContainerImage: bitnami/kubectl:latest
+alcideAdvisorImage: alcide/advisor:stable
+
 serviceAccount: kube-advisor
 clusterRole: kube-advisor-clusterRole
 clusterRoleBinding: kube-advisor-clusterRoleBinding
