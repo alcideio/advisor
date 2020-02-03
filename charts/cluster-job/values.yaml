@@ -23,7 +23,7 @@ alcide:
   orgId: yourorg
   apiServer: free.cloud.alcide.io
   apiKey: 
-  advisorProfileId: 
+  advisorProfileId: ""
 
 slack:
   #<Your_Slack_Channel>
