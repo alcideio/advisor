@@ -1,15 +1,40 @@
-namespace: alcide-kube-advisor
-cronSchedule: "* * * * *"
-initContainerImage: bitnami/kubectl:latest
-alcideAdvisorImage: alcide/advisor:stable
+namespace: alcide-advisor
+images:
+  initContainerImage: bitnami/kubectl:latest #Obtain CA Certs
+  alcideAdvisorImage: alcide/advisor:stable
 
-serviceAccount: kube-advisor
-clusterRole: kube-advisor-clusterRole
-clusterRoleBinding: kube-advisor-clusterRoleBinding
+#  string	   meaning
+#  ------	   -------
+#  @yearly	   Run once a year, "0 0 1 1 *".
+#  @annually	 (same as @yearly)
+#  @monthly	   Run once a month, "0	0 1 * *".
+#  @weekly	   Run once a week, "0 0 * * 0".
+#  @daily	     Run once a day, "0 0	* * *".
+#  @midnight	 (same as @daily)
+#  @hourly	   Run once an hour, "0	* * * *".
+#  @every_minute   Run once a minute, "*/1 * * * *".
+#  @every_second   Run once a second.
+cronSchedule: "0 * * * *"
+
+# Example: 
+# advisor validate cluster --output html --outfile report.html --profile-id 11111111-1111-1111-aaaa-bbbbbbbbbbbb --organization salesonboarding --alcide-api-server free.cloud.alcide.io --cluster-context <Your_Cluster_Context>  --alcide-api-key <Your_Alcide_API_Key>
+# Create an account: https://www.alcide.io/pricing/
+alcide:
+  orgId: yourorg
+  apiServer: free.cloud.alcide.io
+  apiKey: 
+  advisorProfileId: 
 
 slack:
-  channel: <Your_Slack_Channel>
-  token: <Your_Slack_API_Token>
+  #<Your_Slack_Channel>
+  channel: >
+      @someuser
+  #Slack OAuth Token - https://api.slack.com/apps/ - should have the form: xoxb-12345678901-123456789012-EHc1F5MowLEPYfEqoIKKwgxM
+  token: 
 
-kubeconfig:
-  contextName: default-context
+s3:
+  # Format: s3://mybucket/subdir
+  s3Url: ""
+  #S3 AWS Access Secret and Key Id
+  awsAccessKeyId: 
+  awsSecretKey:

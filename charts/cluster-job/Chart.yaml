@@ -1,6 +1,14 @@
 apiVersion: v2
-name: scheduled-advisor
-description: A Helm chart for Kubernetes
+name: alcide-advisor-cronjob
+description: Alcide Advisor CronJob Helm Chart
+keywords:
+  - security
+  - vulnerability scan
+  - guardrails
 type: application
-version: 0.1.0
-appVersion: 1.16.0
+version: 2.0.0
+appVersion: 2.11.0
+icon: https://www.alcide.io/wp-content/uploads/2020/01/advisor@3x.png
+sources:
+- https://github.com/alcideio/advisor
+- https://github.com/alcideio/pipeline

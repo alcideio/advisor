@@ -2,93 +2,100 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: advisorjob
+  name: alcide-advisor
   namespace: {{ .Values.namespace }}
 spec:
   schedule: {{ .Values.cronSchedule | quote }}
+  # Keep the last run 
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1  
+  # Concurrency is not required
+  concurrencyPolicy: Forbid
+
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccountName: {{ .Values.serviceAccount }}
+          serviceAccountName: alcide-advisor
           initContainers:
-          - name: generate-kubeconfig
-            image: {{ .Values.initContainerImage }}
-            command: ["/bin/sh","-c"]
-            args:
-              - |
-                /scripts/set-cluster-context.sh $(CLUSTER_CONTEXT_NAME) $(NAMESPACE_NAME) $(SERVICEACCOUNT_NAME);
-                cp /etc/ssl/certs/ca-certificates.crt /certs/
+          - name: fresh-ca-certs
+            image: {{ .Values.images.initContainerImage }}
+            command:
+            - sh
+            - -c
+            - cp /etc/ssl/certs/* /certs/
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
                 drop:
-                - all
+                - ALL
               runAsNonRoot: true
               runAsUser: 10001
               readOnlyRootFilesystem: true
-            env:
-              - name: CLUSTER_CONTEXT_NAME
-                value: {{ .Values.kubeconfig.contextName }}
-              - name: NAMESPACE_NAME
-                value: {{ .Values.namespace }}
-              - name: SERVICEACCOUNT_NAME
-                value: {{ .Values.serviceAccount }}
             volumeMounts:
-            - name: scripts
-              mountPath: /scripts
-            - name: kube-config-volume
-              mountPath: /kube
             - name: ca-certificates
               mountPath: /certs
           containers:
-          - name: advisor-scan
-            image: {{ .Values.alcideAdvisorImage }}
+          - name: advisor
+            image: {{ .Values.images.alcideAdvisorImage }}
             args:
               - --eula-sign
               - validate
               - cluster
-              - --cluster-context
-              - $(CLUSTER_CONTEXT_NAME)
+              - --inCluster
               - --slack-api-token
-              - $(SLACK_API_TOKEN)
+              - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)              
               - --slack-channel
-              - $(SLACK_CHANNEL)
+              - "{{ .Values.slack.channel }}"
+{{ if ne .Values.alcide.advisorProfileId ""}}
+              - --profile-id
+              - {{ .Values.alcide.advisorProfileId }}  
+              - --organization
+              - {{ .Values.alcide.orgId }}
+              - --alcide-api-server
+              - {{ .Values.alcide.apiServer }}               
+              - --alcide-api-key
+              - $(ALCIDE_API_KEY)                                         
+{{ end }} 
+{{ if ne .Values.s3.s3Url "" }}
+              - --s3-export-url
+              - {{ .Values.s3.s3Url }}                                         
+{{ end }}              
+              #- --debug
+             
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
                 drop:
-                - all
+                - ALL
               runAsNonRoot: true
               runAsUser: 10001
               readOnlyRootFilesystem: true
             env:
-              - name: KUBECONFIG
-                value: "/kube/config"
-              - name: CLUSTER_CONTEXT_NAME
-                value: {{ .Values.kubeconfig.contextName }}
-              - name: SLACK_API_TOKEN
+              - name: ALCIDE_API_KEY
                 valueFrom:
                   secretKeyRef:
-                    name: slackapitoken
-                    key: token
-              - name: SLACK_CHANNEL
-                value: {{ .Values.slack.channel }}
+                    name: alcide-advisor-exports
+                    key: alcideApiKey           
+              - name: ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-exports
+                    key: slackApiToken
+              - name: ALCIDE_ADVISOR_EXPORT_AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-exports
+                    key: awsAccessKeyId
+              - name: ALCIDE_ADVISOR_EXPORT_AWS_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-exports
+                    key: awsSecretKey                                                  
             volumeMounts:
-            - name: kube-config-volume
-              mountPath: /kube
             - name: ca-certificates
               mountPath: /etc/ssl/certs
           volumes:
-            - name: scripts
-              configMap:
-                name: generate-kubeconfig-script
-                defaultMode: 0777
-                items:
-                - key: set-cluster-context
-                  path: set-cluster-context.sh
-            - name: kube-config-volume
-              emptyDir: {}
             - name: ca-certificates
               emptyDir: {}
           restartPolicy: OnFailure
