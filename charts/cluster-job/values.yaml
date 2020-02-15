@@ -1,7 +1,10 @@
 namespace: alcide-advisor
 images:
-  initContainerImage: bitnami/kubectl:latest #Obtain CA Certs
   alcideAdvisorImage: alcide/advisor:stable
+
+jobTemplate:
+  #{"myannotation1" : "val" , "myannotation2": "anotherval"}
+  annotations: {} 
 
 #  string	   meaning
 #  ------	   -------
@@ -21,7 +24,7 @@ cronSchedule: "0 * * * *"
 # Create an account: https://www.alcide.io/pricing/
 alcide:
   orgId: yourorg
-  apiServer: free.cloud.alcide.io
+  apiServer: yourorg.cloud.alcide.io
   apiKey: 
   advisorProfileId: ""
 
@@ -38,3 +41,8 @@ s3:
   #S3 AWS Access Secret and Key Id
   awsAccessKeyId: 
   awsSecretKey:
+
+prometheus:
+  pushGateway: ""
+  username: 
+  password:  
