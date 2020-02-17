@@ -1,6 +1,6 @@
 namespace: alcide-advisor
 image:
-  alcideAdvisor: alcidelabs/advisor:2.10-vault-0.2
+  alcideAdvisor: alcide/advisor:stable # For Vault secret support use alcidelabs/advisor:2.10.1-vault
   pullPolicy: Always #IfNotPresent
 
 #  string	   meaning
@@ -72,7 +72,6 @@ prometheus:
 #     alcideApiKey=alcideapikey  \
 #     prometheusUsername=''   \
 #     prometheusPassword=''   
-
 vaultAgent:
-  enabled: true
+  enabled: false
   secretFileName: alcide-advisor.yaml
