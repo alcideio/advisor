@@ -89,7 +89,7 @@ spec:
               - --config 
               - /vault/secrets/{{ .Values.vaultAgent.secretFileName }}
 {{ end }}
-              #- --debug
+              - --debug
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
