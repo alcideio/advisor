@@ -8,7 +8,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: alcide-advisor-clusterrole
+  name: alcide-advisor
 rules:
   - apiGroups: ["*"]
     resources: ["*"]
@@ -20,11 +20,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: alcide-advisor-clusterrolebinding
+  name: alcide-advisor-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: alcide-advisor-clusterrole
+  name: alcide-advisor
 subjects:
   - kind: ServiceAccount
     name: alcide-advisor
