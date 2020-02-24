@@ -1,0 +1,87 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: advisorjob
+  namespace: alcide
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: advisor
+            run: alcide-advisor
+            version: dev
+        spec:
+          initContainers:
+            - name: alcide-advisor
+              image: alcidelabs/advisor:2.10.1-vault
+              imagePullPolicy: Always
+              args:
+                  - --eula-sign
+                  - validate
+                  - cluster
+                  - --inCluster
+                  - --outfile
+                  - /home/vault/advisor.html
+                  - --debug
+              volumeMounts:
+                - mountPath: /home/vault
+                  name: vault-token
+              securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                    - all
+                  runAsNonRoot: true
+                  runAsUser: 10001
+          containers:
+            - name: alcide-cli
+              image: python:3.8.1-alpine
+              imagePullPolicy: Always
+              command: [sh, -c, "pip install awscli && aws s3 cp /home/vault/advisor.html s3://${S3_DESTINATION} --acl public-read"]
+              resources: {}
+              env:
+                - name: AWS_SHARED_CREDENTIALS_FILE
+                  value: /home/vault/secrets/aws/credentials
+                - name: AWS_REGION
+                  value: us-east-2
+                - name: S3_DESTINATION
+                  value: advisor-report-poc/index.html
+              volumeMounts:
+                - mountPath: /home/vault
+                  name: vault-token
+            - name: vault-agent-auth
+              args:
+                - agent
+                - -config=/etc/vault/vault-agent-config.hcl
+              env:
+                - name: VAULT_ADDR
+                  value: http://vault.default:8200
+                - name: VAULT_AGENT_ADDR
+                  value: http://localhost:8100
+              image: vault
+              imagePullPolicy: Always
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              volumeMounts:
+                - mountPath: /etc/vault
+                  name: config
+                - mountPath: /home/vault
+                  name: vault-token
+          serviceAccountName: alcide-advisor
+          volumes:
+            - emptyDir:
+                medium: Memory
+              name: vault-token
+            - configMap:
+                defaultMode: 420
+                items:
+                  - key: vault-agent-config.hcl
+                    path: vault-agent-config.hcl
+                name: vault-agent-config
+              name: config
+          restartPolicy: OnFailure
