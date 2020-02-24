@@ -1,6 +1,6 @@
 namespace: alcide-advisor
 image:
-  alcideAdvisor: alcide/advisor:stable # For Vault secret support use alcidelabs/advisor:2.10.1-vault
+  alcideAdvisor: alcidelabs/advisor:2.10.1-vault #alcide/advisor:stable # For Vault secret support use alcidelabs/advisor:2.10.1-vault
   pullPolicy: Always #IfNotPresent
 
 #  string	   meaning
@@ -36,7 +36,7 @@ slack:
 
 s3:
   # Format: s3://mybucket/subdir?region=us-west-2
-  s3Url: ""
+  s3Url: "s3://mybucket/subdir?region=us-west-2"
   # S3 AWS Access Secret and Key Id
   awsAccessKeyId:
   awsSecretKey:
@@ -73,5 +73,5 @@ prometheus:
 #     prometheusUsername=''   \
 #     prometheusPassword=''   
 vaultAgent:
-  enabled: false
+  enabled: true
   secretFileName: alcide-advisor.yaml

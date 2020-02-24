@@ -1,11 +1,22 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: alcide-advisor
 ---
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: advisorjob
-  namespace: alcide
+  namespace: alcide-advisor
 spec:
-  schedule: "*/10 * * * *"
+  schedule: "*/1 * * * *"
+  
+  # Keep the last run 
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1  
+  # Concurrency is not required
+  concurrencyPolicy: Forbid
+
   jobTemplate:
     spec:
       template:
@@ -17,15 +28,17 @@ spec:
         spec:
           initContainers:
             - name: alcide-advisor
-              image: alcidelabs/advisor:2.10.1-vault
+              image: alcide/advisor:stable
               imagePullPolicy: Always
               args:
                   - --eula-sign
                   - validate
                   - cluster
                   - --inCluster
+                  - --output
+                  - json
                   - --outfile
-                  - /home/vault/advisor.html
+                  - /home/vault/advisor.json
                   - --debug
               volumeMounts:
                 - mountPath: /home/vault
@@ -34,14 +47,14 @@ spec:
                   allowPrivilegeEscalation: false
                   capabilities:
                     drop:
-                    - all
+                    - ALL
                   runAsNonRoot: true
                   runAsUser: 10001
           containers:
             - name: alcide-cli
               image: python:3.8.1-alpine
-              imagePullPolicy: Always
-              command: [sh, -c, "pip install awscli && aws s3 cp /home/vault/advisor.html s3://${S3_DESTINATION} --acl public-read"]
+              imagePullPolicy: IfNotPresent
+              command: [sh, -c, "pip install awscli && aws s3 cp /home/vault/advisor.json s3://${S3_DESTINATION} --acl private"]
               resources: {}
               env:
                 - name: AWS_SHARED_CREDENTIALS_FILE
@@ -49,7 +62,7 @@ spec:
                 - name: AWS_REGION
                   value: us-east-2
                 - name: S3_DESTINATION
-                  value: advisor-report-poc/index.html
+                  value: advisor-report/advisor.json
               volumeMounts:
                 - mountPath: /home/vault
                   name: vault-token
@@ -59,11 +72,11 @@ spec:
                 - -config=/etc/vault/vault-agent-config.hcl
               env:
                 - name: VAULT_ADDR
-                  value: http://vault.default:8200
+                  value: http://vault.demo:8200
                 - name: VAULT_AGENT_ADDR
                   value: http://localhost:8100
               image: vault
-              imagePullPolicy: Always
+              imagePullPolicy: IfNotPresent
               resources: {}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File

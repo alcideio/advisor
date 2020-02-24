@@ -1,3 +1,7 @@
+kind: ConfigMap
+metadata:
+  name: vault-agent-config
+  namespace: alcide-advisor
 apiVersion: v1
 data:
   vault-agent-config.hcl: |-
@@ -58,7 +62,4 @@ data:
       {{- end }}
       EOH
     }
-kind: ConfigMap
-metadata:
-  name: vault-agent-config
-  namespace: alcide
+

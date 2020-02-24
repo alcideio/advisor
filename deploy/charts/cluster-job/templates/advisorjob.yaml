@@ -63,8 +63,10 @@ spec:
               - validate
               - cluster
               - --inCluster
+{{ if not .Values.vaultAgent.enabled }}              
               - --slack-api-token
-              - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)              
+              - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)
+{{ end }}                             
               - --slack-channel
               - {{ .Values.slack.channel | quote }}
 {{ if ne .Values.alcide.advisorProfileId "" }}
@@ -98,8 +100,8 @@ spec:
               runAsNonRoot: true
               runAsUser: 10001
               readOnlyRootFilesystem: true
+{{ if not .Values.vaultAgent.enabled }}               
             env:
-{{ if not .Values.vaultAgent.enabled }}            
               - name: ALCIDE_API_KEY
                 valueFrom:
                   secretKeyRef:
