@@ -41,52 +41,64 @@ spec:
               resources: {}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
-              volumeMounts:
+              volumeMounts:            
                 - mountPath: /etc/vault
                   name: config
                 - mountPath: /home/vault
                   name: vault-token
-            - name: alcide-advisor
-              image: alcide/advisor:stable
+          containers:
+            - name: advisor
+              #
+              # For debugging Vault injection ... going away soooooon
+              #
+              # imagePullPolicy: IfNotPresent
+              # image: nginx
+              # command: ["nginx", "-g", "daemon off;"]
+              image: alcidelabs/advisor:2.10.1-vault
               imagePullPolicy: Always
               args:
-                  - --eula-sign
-                  - validate
-                  - cluster
-                  - --inCluster
-                  - --output
-                  - json
-                  - --outfile
-                  - /home/vault/advisor.json
-                  - --debug
-              volumeMounts:
-                - mountPath: /home/vault
-                  name: vault-token
+                - --eula-sign
+                - validate
+                - cluster
+                - --inCluster
+                #
+                # Slack Export
+                #                              
+                # - --slack-channel
+                # - "@someuser"
+                #
+                # Use Alcide Cloud managed scan profile
+                #
+                # - --profile-id
+                # - 12345-6789-1234-aaaa-1234567678
+                # - --organization
+                # - myaccount
+                # - --alcide-api-server
+                # - myaccount.cloud.alcide.io
+                #
+                # S3 Export
+                #
+                #- --s3-export-url
+                #- "s3://mybucket/subdir?region=us-west-2"
+                #
+                # Load Secrets from file
+                #
+                - --config 
+                - /home/vault/secrets/alcide-advisor.yaml
+                #- --debug
               securityContext:
-                  allowPrivilegeEscalation: false
-                  capabilities:
-                    drop:
-                    - ALL
-                  runAsNonRoot: true
-                  runAsUser: 10001
-          containers:
-            - name: alcide-cli
-              image: python:3.8.1-alpine
-              imagePullPolicy: IfNotPresent
-              command: [sh, -c, "pip install awscli && aws s3 cp /home/vault/advisor.json s3://${S3_DESTINATION} --acl private"]
-              resources: {}
-              env:
-                - name: AWS_SHARED_CREDENTIALS_FILE
-                  value: /home/vault/secrets/aws/credentials
-                - name: AWS_REGION
-                  value: us-east-2
-                - name: S3_DESTINATION
-                  value: <S3 BucketName>/advisor.json
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                  - ALL
+                runAsNonRoot: true
+                runAsUser: 10001
+                readOnlyRootFilesystem: true
               volumeMounts:
                 - mountPath: /home/vault
-                  name: vault-token
+                  name: vault-token                
           serviceAccountName: alcide-advisor
-          volumes:
+          volumes:         
             - emptyDir:
                 medium: Memory
               name: vault-token

@@ -46,8 +46,8 @@ data:
         slackApiToken: {{ .Data.data.slackApiToken }}
       {{- end }}
       {{- if  .Data.data.alcideApiKey }}
-        Profile:
-          alcideApiKey: {{ .Data.data.alcideApiKey }}
+      Profile:
+        alcideApiKey: {{ .Data.data.alcideApiKey }}
       {{- end }}
       {{- end }}
       EOH
