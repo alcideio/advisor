@@ -3,7 +3,7 @@ name: Test Matrix Alcide Advisor
 on:
   push:
     branches:
-      - 'test-matrix'
+      - '*'
 
 jobs:
   advisor-tests:
