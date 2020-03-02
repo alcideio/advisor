@@ -1,0 +1,60 @@
+name: Test Matrix Alcide Advisor
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  advisor-tests:
+    name: advisor-test on k8s ${{ matrix.config.kubever }}
+    runs-on: ubuntu-latest
+
+  # env:
+  #   CTEST_OUTPUT_ON_FAILURE: ON
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - kubever: v1.11.10
+          - kubever: v1.12.10
+          - kubever: v1.13.12
+          - kubever: v1.14.10
+          - kubever: v1.15.7
+          - kubever: v1.16.4
+          - kubever: v1.17.0
+
+
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Launch Cluster
+        uses: helm/kind-action@v1.0.0-alpha.3
+        with:
+          version: v0.7.0
+          name: kruzer
+          node_image: kindest/node:${{ matrix.config.kubever }}
+          wait: 5m
+          install_local_path_provisioner: true
+
+      - name: Test
+        run: |
+          kubectl cluster-info
+          kubectl get storageclass standard
+
+      - name: Scan Local Cluster
+        uses: alcideio/advisor-action@v1.1.0   
+        with:
+          exclude_namespaces: '-'
+          include_namespaces: '*'
+          output_file: 'advisor-scan-${{ matrix.config.kubever }}.html'
+
+      - name: Upload Alcide Advisor Scan Report
+        uses: actions/upload-artifact@v1
+        with:
+          name: 'advisor-scan-${{ matrix.config.kubever }}.html' 
+          path: 'advisor-scan-${{ matrix.config.kubever }}.html' 
+
