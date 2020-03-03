@@ -1,0 +1,44 @@
+categories: 
+  - 
+    labels: 
+      - feature
+      - enhancement
+    title: Features
+  - 
+    labels: 
+      - fix
+      - bugfix
+      - bug
+    title: "Bug Fixes"
+  - 
+    labels: 
+      - release/highlight
+    title: "🚀 Highlights"
+  - 
+    labels: 
+      - release/breaking-change
+    title: "⚠️ Breaking Changes"
+  - 
+    label: chore
+    title: Maintenance
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+name-template: "Alcide Kubernetes Advisor Github Action - v$NEXT_PATCH_VERSION 🚀"
+tag-template: v$NEXT_PATCH_VERSION
+template: |-
+    ## Changes
+    
+    $CHANGES 
+    
+    ## About *Alcide Advisor*
+    
+    Alcide Advisor is an agentless service for Kubernetes audit and compliance that’s built to ensure a frictionless and secured DevSecOps workflow by layering a hygiene scan of Kubernetes cluster & workloads early in the development process and before moving to production. With Alcide Advisor, you can cover the following security checks
+    *  Kubernetes infrastructure vulnerability scanning.
+    *  Hunting misplaced secrets, or excessive priviliges for secret access.
+    *  Workload hardening from Pod Security to network policies.
+    *  Istio security configuration and best practices.
+    *  Ingress Controllers for security best practices.
+    *  Kubernetes API server access privileges.
+    *  Kubernetes operators security best practices.
+    *  Deployment conformance to labeling, annotating, resource limits and much more ...
+    
+    [Create Alcide Advisor Account](https://www.alcide.io/pricing)
