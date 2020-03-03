@@ -1,0 +1,216 @@
+---
+# Source: alcide-advisor-cronjob/templates/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: alcide-advisor
+---
+# Source: alcide-advisor-cronjob/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alcide-advisor
+  namespace: alcide-advisor
+---
+# Source: alcide-advisor-cronjob/templates/vault-agent-config.yaml
+kind: ConfigMap
+metadata:
+  name: vault-agent-config
+  namespace: alcide-advisor
+apiVersion: v1
+data:
+  vault-agent-config.hcl: |-
+    exit_after_auth = true
+    pid_file = "/home/vault/pidfile"
+
+    auto_auth {
+        method "kubernetes" {
+            mount_path = "auth/kubernetes"
+            config = {
+                role = "alcide-advisor"
+            }
+        }
+    }
+    listener "tcp" {
+        address = "localhost:8100"
+        tls_disable = true
+    }
+    cache {
+        use_auto_auth_token = true
+    }
+    sink "file" {
+        config = {
+            path = "/vault/.vault-token"
+        }
+    }
+
+    template {
+      destination = "/vault/secrets/alcide-advisor.yaml"
+      contents = <<EOH
+      Exports:
+      {{- with secret "secret/alcide/advisor" -}}   
+        {{- if  .Data.data.prometheusUsername }}
+        prometheusPassword: {{ .Data.data.prometheusPassword }}
+        prometheusUsername: {{ .Data.data.prometheusUsername }}
+        {{- end }}      
+
+        {{- if .Data.data.s3AwsAccessKeyId }}  
+        s3AwsAccessKeyId: {{ .Data.data.s3AwsAccessKeyId }}
+        s3AwsSecretAccessKey: {{ .Data.data.s3AwsSecretAccessKey }}
+        {{- end }}  
+
+        {{- if .Data.data.slackApiToken }}  
+        slackApiToken: {{ .Data.data.slackApiToken }}
+        {{- end }}   
+
+        {{- if  .Data.data.alcideApiKey }}             
+      Profile:
+        alcideApiKey: {{ .Data.data.alcideApiKey }}
+        {{- end }}   
+      {{- end }}
+      EOH
+    }
+
+    template {
+      destination = "/vault/secrets/aws/credentials"
+      contents = <<EOH
+      [default]
+      {{- with secret "secret/alcide/advisor" }}
+      aws_access_key_id = {{ .Data.data.s3AwsAccessKeyId }}
+      aws_secret_access_key = {{ .Data.data.s3AwsSecretAccessKey }}
+      {{- end }}
+      EOH
+    }
+---
+# Source: alcide-advisor-cronjob/templates/rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: alcide-advisor
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["proxy"]    
+  - apiGroups: ["authorization.k8s.io"]
+    resources: ["subjectaccessreviews"]
+    verbs: ["create"]
+---
+# Source: alcide-advisor-cronjob/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: alcide-advisor-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: alcide-advisor
+subjects:
+  - kind: ServiceAccount
+    name: alcide-advisor
+    namespace: alcide-advisor
+---
+# Source: alcide-advisor-cronjob/templates/advisorjob.yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: alcide-advisor
+  namespace: alcide-advisor
+spec:
+  schedule: "*/1 * * * *"
+  # Keep the last run 
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1  
+  # Concurrency is not required
+  concurrencyPolicy: Forbid
+
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            alcide.io/advisor: "cronjob" 
+
+        spec:
+          serviceAccountName: alcide-advisor
+
+          volumes:         
+            - emptyDir:
+                medium: Memory
+              name: vault-token
+            - configMap:
+                defaultMode: 420
+                items:
+                  - key: vault-agent-config.hcl
+                    path: vault-agent-config.hcl
+                name: vault-agent-config
+              name: vault-agent-config           
+          initContainers:
+            - name: vault-agent-auth
+              args:
+                - agent
+                - -config=/etc/vault/vault-agent-config.hcl
+              env:
+                - name: VAULT_ADDR
+                  value: http://vault.demo:8200 
+                - name: VAULT_AGENT_ADDR
+                  value: http://localhost:8100
+              image: vault
+              imagePullPolicy: IfNotPresent              
+              volumeMounts:            
+                - mountPath: /etc/vault
+                  name: vault-agent-config
+                - mountPath: /vault
+                  name: vault-token
+
+          containers:
+          - name: advisor
+            #
+            # For debugging Vault injection ... going away soooooon
+            #
+#             imagePullPolicy: IfNotPresent
+#             image: nginx
+#             command: ["nginx", "-g", "daemon off;"]
+#           
+#             volumeMounts:            
+#                 - mountPath: /vault
+#                   name: vault-token
+#              
+            image: alcidelabs/advisor:2.10.1-vault
+            imagePullPolicy: Always
+          
+            volumeMounts:            
+                - mountPath: /vault
+                  name: vault-token
+                  
+            args:
+              - --eula-sign
+              - validate
+              - cluster
+              - --inCluster
+                             
+              - --slack-channel
+              - "@someuser"
+ 
+
+              - --s3-export-url
+              - "s3://mybucket/subdir?region=us-west-2"
+     
+
+
+              - --config 
+              - /vault/secrets/alcide-advisor.yaml
+
+              #- --debug
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+              runAsNonRoot: true
+              runAsUser: 10001
+              readOnlyRootFilesystem: true
+                      
+          restartPolicy: OnFailure
