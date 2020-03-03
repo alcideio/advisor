@@ -1,0 +1,157 @@
+---
+# Source: alcide-advisor-cronjob/templates/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: alcide-advisor
+---
+# Source: alcide-advisor-cronjob/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alcide-advisor
+  namespace: alcide-advisor
+---
+# Source: alcide-advisor-cronjob/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alcide-advisor-exports
+  namespace: alcide-advisor
+type: Opaque
+data:
+  alcideApiKey: ""
+  slackApiToken: ""
+  awsAccessKeyId:  ""
+  awsSecretKey: ""
+
+  promPushGatewayUsername: ""
+  promPushGatewayPassword: ""
+---
+# Source: alcide-advisor-cronjob/templates/rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: alcide-advisor
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["proxy"]    
+  - apiGroups: ["authorization.k8s.io"]
+    resources: ["subjectaccessreviews"]
+    verbs: ["create"]
+---
+# Source: alcide-advisor-cronjob/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: alcide-advisor-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: alcide-advisor
+subjects:
+  - kind: ServiceAccount
+    name: alcide-advisor
+    namespace: alcide-advisor
+---
+# Source: alcide-advisor-cronjob/templates/advisorjob.yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: alcide-advisor
+  namespace: alcide-advisor
+spec:
+  schedule: "*/1 * * * *"
+  # Keep the last run 
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1  
+  # Concurrency is not required
+  concurrencyPolicy: Forbid
+
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            alcide.io/advisor: "cronjob" 
+
+        spec:
+          serviceAccountName: alcide-advisor
+
+          containers:
+          - name: advisor
+            #
+            # For debugging Vault injection ... going away soooooon
+            #
+#             imagePullPolicy: IfNotPresent
+#             image: nginx
+#             command: ["nginx", "-g", "daemon off;"]
+#              
+            image: alcide/advisor:stable
+            imagePullPolicy: Always
+                  
+            args:
+              - --eula-sign
+              - validate
+              - cluster
+              - --inCluster
+              
+              - --slack-api-token
+              - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)
+                             
+              - --slack-channel
+              - "@someuser"
+ 
+
+              - --s3-export-url
+              - "s3://mybucket/subdir?region=us-west-2"
+     
+
+
+              #- --debug
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+              runAsNonRoot: true
+              runAsUser: 10001
+              readOnlyRootFilesystem: true
+            
+            env:
+              - name: ALCIDE_API_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-exports
+                    key: alcideApiKey           
+              - name: ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-exports
+                    key: slackApiToken
+              - name: ALCIDE_ADVISOR_EXPORT_AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-exports
+                    key: awsAccessKeyId
+              - name: ALCIDE_ADVISOR_EXPORT_AWS_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-exports
+                    key: awsSecretKey 
+              - name: ALCIDE_ADVISOR_EXPORT_PROM_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-exports
+                    key: promPushGatewayUsername 
+              - name: ALCIDE_ADVISOR_EXPORT_PROM_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-exports
+                    key: promPushGatewayPassword 
+                      
+          restartPolicy: OnFailure

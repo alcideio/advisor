@@ -1,3 +1,22 @@
+# Customize Your Deployment Files
+
+ 
+> Install Helm 3:
+  ```bash
+  make get-deps
+  ```
+> Edit Alcide Advisor [Helm Chart Value File](deploy/charts/cluster-job/values.yaml)
+  * Default deployment
+  * Default deployment with support for *Hashicorp Vault*
+  * Default deployment with support for *Hashicorp Vault* **Agent Injector**
+
+> Generate Kubernetes YAML file)s)   
+  ```bash
+  make gen-k8s-deploy-all
+  ```
+
+
+
 # Alcide Advisor Vault integration Examples
 
 this example runs Alcide advisor as a kubernetes cron job.

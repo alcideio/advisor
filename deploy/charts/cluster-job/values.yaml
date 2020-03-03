@@ -46,32 +46,40 @@ prometheus:
   username: 
   password:  
 
-#
-# Vault Secrets (Assume KV v2)
-# See also: https://www.hashicorp.com/blog/injecting-vault-secrets-into-kubernetes-pods-via-a-sidecar/
-#
-
-# cat <<EOF > /home/vault/alcide-policy.hcl
-# path "secret/data/alcide/advisor" {
-#   capabilities = ["read"]
-# }
-# EOF
-
-# vault policy write alcide-advisor /home/vault/alcide-policy.hcl
-
-# vault write auth/kubernetes/role/alcide-advisor \
-#    bound_service_account_names=alcide-advisor \
-#    bound_service_account_namespaces=alcide-advisor \
-#    policies=alcide-advisor \
-#    ttl=1h
-
-# vault kv put secret/alcide/advisor \
-#     s3AwsAccessKeyId=someawskey \
-#     s3AwsSecretAccessKey=someawssecret \
-#     slackApiToken=xoxb-somekey \
-#     alcideApiKey=alcideapikey  \
-#     prometheusUsername=''   \
-#     prometheusPassword=''   
 vaultAgent:
-  enabled: true
-  secretFileName: alcide-advisor.yaml
+  #
+  # Vault Secrets (Assume KV v2)
+  # See also: https://www.hashicorp.com/blog/injecting-vault-secrets-into-kubernetes-pods-via-a-sidecar/
+  #
+
+  # cat <<EOF > /home/vault/alcide-policy.hcl
+  # path "secret/data/alcide/advisor" {
+  #   capabilities = ["read"]
+  # }
+  # EOF
+
+  # vault policy write alcide-advisor /home/vault/alcide-policy.hcl
+
+  # vault write auth/kubernetes/role/alcide-advisor \
+  #    bound_service_account_names=alcide-advisor \
+  #    bound_service_account_namespaces=alcide-advisor \
+  #    policies=alcide-advisor \
+  #    ttl=1h
+
+  # vault kv put secret/alcide/advisor \
+  #     s3AwsAccessKeyId=someawskey \
+  #     s3AwsSecretAccessKey=someawssecret \
+  #     slackApiToken=xoxb-somekey \
+  #     alcideApiKey=alcideapikey  \
+  #     prometheusUsername=''   \
+  #     prometheusPassword=''    
+
+  #
+  # Mode can be one of: 
+  #    none, agent-inject, vault
+  mode: "none"
+
+  #
+  # For "vault" mode this parameter is required
+  #
+  vaultServer: "http://vault.demo:8200"

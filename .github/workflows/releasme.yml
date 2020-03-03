@@ -23,13 +23,6 @@ jobs:
     name: Release Me
     runs-on: ubuntu-latest
     needs: tag-master
-    env:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_GITHUB_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-      DOCKER_REGISTRY_URL: "docker.pkg.github.com"  
-      DOCKER_IMAGE: kruzio/kube-dialer
-      REPOSITORY: kruzio/kube-dialer/dialer  
-
     steps:
       - name: Create Release
         id: create_release
