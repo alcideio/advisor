@@ -1,5 +1,7 @@
 # Alcide Kubernetes Advisor
 
+![Alcide Advisor](https://codelab.alcide.io/images/card-frontpage/frontpage-alcide-advisor.png "Alcide Advisor")
+
 Alcide Advisor is an agentless service for Kubernetes audit and compliance that’s built to ensure a frictionless and secured DevSecOps workflow by layering a hygiene scan of Kubernetes cluster & workloads early in the development process and before moving to production.
 
 With Alcide Advisor, you can cover the following security checks:
