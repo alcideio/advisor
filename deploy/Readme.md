@@ -5,12 +5,12 @@
   ```bash
   make get-deps
   ```
-> Edit Alcide Advisor [Helm Chart Value File](deploy/charts/cluster-job/values.yaml)
+> Edit Alcide Advisor [Helm Chart Value File](charts/cluster-job/values.yaml)
   * Default deployment
   * Default deployment with support for *Hashicorp Vault*
   * Default deployment with support for *Hashicorp Vault* **Agent Injector**
 
-> Generate Kubernetes YAML file)s)   
+> Generate Kubernetes YAML file)s)
   ```bash
   make gen-k8s-deploy-all
   ```
