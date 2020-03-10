@@ -15,6 +15,8 @@ With Alcide Advisor, you can cover the following security checks:
 - Kubernetes operators security best practices.
 - Deployment conformance to labeling, annotating, resource limits and much more ...
 
+---
+
 # Running Kubernetes Self Assessment
 
 Make sure the Scan Token Your received from Alcide is available.
@@ -44,10 +46,11 @@ curl -o scan.profile https://raw.githubusercontent.com/alcideio/advisor/master/a
 ```bash
 ./advisor validate cluster --outfile alcide-advisor.html --policy-profile scan.profile --alcide-api-key <Your_Alcide_Scan_Token>
 ```
+***
 
+### **Review the assessment findings in your broweser** - Open *alcide-advisor.html*
 
-### **Review the assessment findings in your broweser** - open *alcide-advisor.html*
-
+***
 
 ## Create Alcide Advisor Account
 
