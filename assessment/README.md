@@ -19,33 +19,34 @@ With Alcide Advisor, you can cover the following security checks:
 
 Make sure the Scan Token Your received from Alcide is available.
 
-1.  ### Download Alcide Advisor Scanner
+1.  ### ***Download Alcide Advisor Scanner***
 
 *For Linux*
 
->```bash
->curl -o advisor https://alcide.blob.core.windows.net/>generic/stable/linux/advisor && chmod +x advisor
->```
+```bash
+curl -o advisor https://alcide.blob.core.windows.net/generic/stable/linux/advisor && chmod +x advisor
+```
 
 *For Mac*
 
->```bash
->curl -o advisor https://alcide.blob.core.windows.net/>generic/stable/darwin/advisor && chmod +x advisor
->```
+```bash
+curl -o advisor https://alcide.blob.core.windows.net/generic/stable/darwin/advisor && chmod +x advisor
+```
 
-2. ### Download Alcide Advisor Assessment Profile
+2. ### ***Download Alcide Advisor Assessment Profile***
 
 ```bash
 curl -o scan.profile https://raw.githubusercontent.com/alcideio/advisor/master/assessment/alcide-kubernetes-assessment.advisor
 ```
 
-3. ### Scan Your Cluster
+3. ### ***Scan Your Cluster***
 
 ```bash
 ./advisor validate cluster --outfile alcide-advisor.html --policy-profile scan.profile --alcide-api-key <Your_Alcide_Scan_Token>
 ```
 
-Review the assessment findings in your broweser **alcide-advisor.html**
+
+### **Review the assessment findings in your broweser** - open *alcide-advisor.html*
 
 
 ## Create Alcide Advisor Account
