@@ -1,4 +1,4 @@
-apiVersion: v2
+apiVersion: v1
 name: alcide-advisor-cronjob
 description: Alcide Advisor CronJob Helm Chart
 keywords:
@@ -7,7 +7,7 @@ keywords:
   - guardrails
 type: application
 version: 2.0.0
-appVersion: 2.11.0
+appVersion: 2.11.1
 icon: https://www.alcide.io/wp-content/uploads/2020/01/advisor@3x.png
 sources:
 - https://github.com/alcideio/advisor
