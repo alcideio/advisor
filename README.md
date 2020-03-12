@@ -7,7 +7,7 @@ Alcide Advisor is an agentless service for Kubernetes audit and compliance thatâ
 With Alcide Advisor, you can cover the following security checks:
 
 - Kubernetes infrastructure vulnerability scanning.
-- Hunting misplaced secrets, or excessive priviliges for secret access.
+- Hunting misplaced secrets, or excessive privileges for secret access.
 - Workload hardening from Pod Security to network policies.
 - Istio security configuration and best practices.
 - Ingress Controllers for security best practices.
