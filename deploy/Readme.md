@@ -77,6 +77,7 @@ this example make use of Vault installed in cluster.
       prometheusPassword=''
   ```
   5. `exit`
+
 ---
 ### Alcide Advisor
   1. create a namespace (if not already exists)
@@ -86,3 +87,11 @@ this example make use of Vault installed in cluster.
   2. edit the cornjob chart. S3 bucket name with the appropriate one:
   > containers -> name: alcide-cli -> env -> name: S3_DESTINATION -> value
   3. edit the cornjob chart. set the cornjob schedule
+
+### Install Alcide Advisor 
+
+Install with Helm 3 
+
+```bash
+helm upgrade --install alcide-advisor deploy/charts/alcide-advisor-cronjob --set vaultAgent.mode=agent-inject --set image.alcideAdvisor=alcidelabs/advisor:2.11.0-vault
+```

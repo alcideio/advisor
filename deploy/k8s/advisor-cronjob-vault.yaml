@@ -178,7 +178,7 @@ spec:
 #                 - mountPath: /vault
 #                   name: vault-token
 #              
-            image: alcidelabs/advisor:2.10.1-vault
+            image: alcidelabs/advisor:2.11.0-vault
             imagePullPolicy: Always
           
             volumeMounts:            
@@ -190,6 +190,8 @@ spec:
               - validate
               - cluster
               - --inCluster
+              - --outfile
+              - /dev/null
                              
               - --slack-channel
               - "@someuser"

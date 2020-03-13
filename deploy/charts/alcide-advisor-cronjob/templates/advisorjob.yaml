@@ -103,6 +103,8 @@ spec:
               - validate
               - cluster
               - --inCluster
+              - --outfile
+              - /dev/null
 {{ if eq .Values.vaultAgent.mode "none" }}              
               - --slack-api-token
               - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)

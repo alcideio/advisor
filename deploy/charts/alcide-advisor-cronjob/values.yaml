@@ -1,6 +1,6 @@
 namespace: alcide-advisor
 image:
-  alcideAdvisor: alcidelabs/advisor:2.10.1-vault #alcide/advisor:stable # For Vault secret support use alcidelabs/advisor:2.10.1-vault
+  alcideAdvisor: alcide/advisor:stable #alcide/advisor:stable # For Vault secret support use alcidelabs/advisor:2.11.0-vault
   pullPolicy: Always #IfNotPresent
 
 #  string	   meaning

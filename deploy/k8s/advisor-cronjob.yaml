@@ -99,6 +99,8 @@ spec:
               - validate
               - cluster
               - --inCluster
+              - --outfile
+              - /dev/null
               
               - --slack-api-token
               - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)

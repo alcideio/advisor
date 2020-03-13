@@ -6,7 +6,7 @@ keywords:
   - vulnerability scan
   - guardrails
 type: application
-version: 2.0.0
+version: 2.0.1
 appVersion: 2.11.1
 icon: https://www.alcide.io/wp-content/uploads/2020/01/advisor@3x.png
 sources:

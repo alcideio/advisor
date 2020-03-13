@@ -102,7 +102,7 @@ spec:
 #             image: nginx
 #             command: ["nginx", "-g", "daemon off;"]
 #              
-            image: alcidelabs/advisor:2.10.1-vault
+            image: alcidelabs/advisor:2.11.0-vault
             imagePullPolicy: Always
                   
             args:
@@ -110,6 +110,8 @@ spec:
               - validate
               - cluster
               - --inCluster
+              - --outfile
+              - /dev/null
                              
               - --slack-channel
               - "@someuser"
