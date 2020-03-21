@@ -9,7 +9,7 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: alcide-advisor
+  name: opseval-alcide-advisor-cronjob
   namespace: alcide-advisor
 ---
 # Source: alcide-advisor-cronjob/templates/vault-agent-config.yaml
@@ -70,23 +70,12 @@ data:
       {{- end }}
       EOH
     }
-
-    template {
-      destination = "/vault/secrets/aws/credentials"
-      contents = <<EOH
-      [default]
-      {{- with secret "secret/alcide/advisor" }}
-      aws_access_key_id = {{ .Data.data.s3AwsAccessKeyId }}
-      aws_secret_access_key = {{ .Data.data.s3AwsSecretAccessKey }}
-      {{- end }}
-      EOH
-    }
 ---
 # Source: alcide-advisor-cronjob/templates/rbac.yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: alcide-advisor
+  name: opseval-alcide-advisor-cronjob
 rules:
   - apiGroups: ["*"]
     resources: ["*"]
@@ -102,22 +91,28 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: alcide-advisor-binding
+  name: opseval-alcide-advisor-cronjob-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: alcide-advisor
+  name: opseval-alcide-advisor-cronjob
 subjects:
   - kind: ServiceAccount
-    name: alcide-advisor
+    name: opseval-alcide-advisor-cronjob
     namespace: alcide-advisor
 ---
 # Source: alcide-advisor-cronjob/templates/advisorjob.yaml
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: alcide-advisor
+  name: opseval-alcide-advisor-cronjob
   namespace: alcide-advisor
+  labels:
+    app.kubernetes.io/name: alcide-advisor-cronjob
+    helm.sh/chart: alcide-advisor-cronjob-2.0.1
+    app.kubernetes.io/instance: opseval
+    app.kubernetes.io/version: "2.11.1"
+    app.kubernetes.io/managed-by: Helm
 spec:
   schedule: "*/1 * * * *"
   # Keep the last run 
@@ -134,9 +129,8 @@ spec:
             alcide.io/advisor: "cronjob" 
 
         spec:
-          serviceAccountName: alcide-advisor
-
-          volumes:         
+          serviceAccountName: opseval-alcide-advisor-cronjob
+          volumes:       
             - emptyDir:
                 medium: Memory
               name: vault-token
@@ -164,47 +158,35 @@ spec:
                   name: vault-agent-config
                 - mountPath: /vault
                   name: vault-token
-
           containers:
           - name: advisor
             #
             # For debugging Vault injection ... going away soooooon
             #
-#             imagePullPolicy: IfNotPresent
-#             image: nginx
-#             command: ["nginx", "-g", "daemon off;"]
-#           
-#             volumeMounts:            
-#                 - mountPath: /vault
-#                   name: vault-token
-#              
+            #imagePullPolicy: IfNotPresent
+            #image: nginx
+            #command: ["nginx", "-g", "daemon off;"]          
+            #volumeMounts:            
+            #    - mountPath: /vault
+            #      name: vault-token             
             image: alcidelabs/advisor:2.11.0-vault
             imagePullPolicy: Always
-          
-            volumeMounts:            
+            volumeMounts:          
                 - mountPath: /vault
-                  name: vault-token
-                  
+                  name: vault-token               
             args:
               - --eula-sign
               - validate
               - cluster
               - --inCluster
               - --outfile
-              - /dev/null
-                             
+              - /dev/null                             
               - --slack-channel
               - "@someuser"
- 
-
               - --s3-export-url
               - "s3://mybucket/subdir?region=us-west-2"
-     
-
-
               - --config 
               - /vault/secrets/alcide-advisor.yaml
-
               #- --debug
             securityContext:
               allowPrivilegeEscalation: false

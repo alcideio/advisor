@@ -57,15 +57,4 @@ data:
       {{"{{- end }}"}}
       EOH
     }
-
-    template {
-      destination = "/vault/secrets/aws/credentials"
-      contents = <<EOH
-      [default]
-      {{"{{- with secret \"secret/alcide/advisor\" }}"}}
-      {{"aws_access_key_id = {{ .Data.data.s3AwsAccessKeyId }}"}}
-      {{"aws_secret_access_key = {{ .Data.data.s3AwsSecretAccessKey }}"}}
-      {{"{{- end }}"}}
-      EOH
-    }
 {{ end }}

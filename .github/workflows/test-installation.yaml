@@ -1,0 +1,45 @@
+name: Test Alcide kAudit Chart
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  installation-tests:
+    name: Alcide Advisor Install Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Launch Cluster
+        uses: helm/kind-action@v1.0.0-alpha.3
+        with:
+          version: v0.7.0
+          name: kruzer
+          node_image: kindest/node:${{ matrix.config.kubever }}
+          wait: 5m
+          install_local_path_provisioner: true
+
+      - name: Install Helm 3
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 
+          chmod 700 get_helm.sh
+          ./get_helm.sh          
+
+
+      - name: Test Installations 
+        run: |
+          #kubectl create ns alcide-advisor
+
+          echo "Installing Alcide Advisor with Exported Profile"
+          helm upgrade -i --wait  exportedprofile deploy/charts/alcide-advisor-cronjob          
+
+          echo "Installing Alcide Advisor"
+          helm upgrade -i --wait  scan deploy/charts/alcide-advisor-cronjob \
+              --set alcide.advisorProfileFile=advisor-profiles/alcide-kubernetes-assessment.advisor 
+ 
+          kubectl -n alcide-advisor get cronjobs
+          kubectl -n alcide-advisor describe cronjobs
+

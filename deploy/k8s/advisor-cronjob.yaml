@@ -9,14 +9,14 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: alcide-advisor
+  name: kubecve-alcide-advisor-cronjob
   namespace: alcide-advisor
 ---
 # Source: alcide-advisor-cronjob/templates/secret.yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: alcide-advisor-exports
+  name: kubecve-alcide-advisor-cronjob-exports
   namespace: alcide-advisor
 type: Opaque
 data:
@@ -32,7 +32,7 @@ data:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: alcide-advisor
+  name: kubecve-alcide-advisor-cronjob
 rules:
   - apiGroups: ["*"]
     resources: ["*"]
@@ -48,22 +48,28 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: alcide-advisor-binding
+  name: kubecve-alcide-advisor-cronjob-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: alcide-advisor
+  name: kubecve-alcide-advisor-cronjob
 subjects:
   - kind: ServiceAccount
-    name: alcide-advisor
+    name: kubecve-alcide-advisor-cronjob
     namespace: alcide-advisor
 ---
 # Source: alcide-advisor-cronjob/templates/advisorjob.yaml
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: alcide-advisor
+  name: kubecve-alcide-advisor-cronjob
   namespace: alcide-advisor
+  labels:
+    app.kubernetes.io/name: alcide-advisor-cronjob
+    helm.sh/chart: alcide-advisor-cronjob-2.0.1
+    app.kubernetes.io/instance: kubecve
+    app.kubernetes.io/version: "2.11.1"
+    app.kubernetes.io/managed-by: Helm
 spec:
   schedule: "*/1 * * * *"
   # Keep the last run 
@@ -80,40 +86,32 @@ spec:
             alcide.io/advisor: "cronjob" 
 
         spec:
-          serviceAccountName: alcide-advisor
-
+          serviceAccountName: kubecve-alcide-advisor-cronjob
+          volumes:
           containers:
           - name: advisor
             #
             # For debugging Vault injection ... going away soooooon
             #
-#             imagePullPolicy: IfNotPresent
-#             image: nginx
-#             command: ["nginx", "-g", "daemon off;"]
-#              
+            #imagePullPolicy: IfNotPresent
+            #image: nginx
+            #command: ["nginx", "-g", "daemon off;"]             
             image: alcide/advisor:stable
             imagePullPolicy: Always
-                  
+            volumeMounts:               
             args:
               - --eula-sign
               - validate
               - cluster
               - --inCluster
               - --outfile
-              - /dev/null
-              
+              - /dev/null              
               - --slack-api-token
-              - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)
-                             
+              - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)                             
               - --slack-channel
               - "@someuser"
- 
-
               - --s3-export-url
               - "s3://mybucket/subdir?region=us-west-2"
-     
-
-
               #- --debug
             securityContext:
               allowPrivilegeEscalation: false
@@ -128,32 +126,32 @@ spec:
               - name: ALCIDE_API_KEY
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: kubecve-alcide-advisor-cronjob-exports
                     key: alcideApiKey           
               - name: ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: kubecve-alcide-advisor-cronjob-exports
                     key: slackApiToken
               - name: ALCIDE_ADVISOR_EXPORT_AWS_ACCESS_KEY_ID
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: kubecve-alcide-advisor-cronjob-exports
                     key: awsAccessKeyId
               - name: ALCIDE_ADVISOR_EXPORT_AWS_SECRET_KEY
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: kubecve-alcide-advisor-cronjob-exports
                     key: awsSecretKey 
               - name: ALCIDE_ADVISOR_EXPORT_PROM_USERNAME
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: kubecve-alcide-advisor-cronjob-exports
                     key: promPushGatewayUsername 
               - name: ALCIDE_ADVISOR_EXPORT_PROM_PASSWORD
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: kubecve-alcide-advisor-cronjob-exports
                     key: promPushGatewayPassword 
                       
           restartPolicy: OnFailure

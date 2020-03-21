@@ -2,8 +2,10 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: alcide-advisor
+  name: {{ template "alcide-advisor.fullname" . }}
   namespace: {{ .Values.namespace }}
+  labels:
+{{ include "alcide-advisor.labels" . | indent 4 }}
 spec:
   schedule: {{ .Values.cronSchedule | quote }}
   # Keep the last run 
@@ -47,9 +49,18 @@ spec:
               {{"{{- end }}"}}
 {{ end }}
         spec:
-          serviceAccountName: alcide-advisor
-{{ if eq .Values.vaultAgent.mode "vault" }}
-          volumes:         
+          serviceAccountName: {{ template "alcide-advisor.fullname" . }}
+          volumes:
+{{- if ne .Values.alcide.advisorProfileFile "" }}
+            - name: advisor-profile
+              configMap:
+                defaultMode: 420
+                items:
+                  - key: profile.advisor
+                    path: profile.advisor
+                name: advisor-policy-{{ .Values.alcide.advisorProfileFile | sha256sum | trunc 5 }}                         
+{{- end }}                      
+{{- if eq .Values.vaultAgent.mode "vault" }}       
             - emptyDir:
                 medium: Memory
               name: vault-token
@@ -77,27 +88,31 @@ spec:
                   name: vault-agent-config
                 - mountPath: /vault
                   name: vault-token
-{{ end }}
+{{- end }}
           containers:
           - name: advisor
             #
             # For debugging Vault injection ... going away soooooon
             #
-#             imagePullPolicy: IfNotPresent
-#             image: nginx
-#             command: ["nginx", "-g", "daemon off;"]
-# {{ if eq .Values.vaultAgent.mode "vault" }}          
-#             volumeMounts:            
-#                 - mountPath: /vault
-#                   name: vault-token
-# {{ end }}             
+            #imagePullPolicy: IfNotPresent
+            #image: nginx
+            #command: ["nginx", "-g", "daemon off;"]
+{{- if eq .Values.vaultAgent.mode "vault" }}          
+            #volumeMounts:            
+            #    - mountPath: /vault
+            #      name: vault-token
+{{- end }}             
             image: {{ .Values.image.alcideAdvisor }}
             imagePullPolicy: {{ .Values.image.pullPolicy }}
-{{ if eq .Values.vaultAgent.mode "vault" }}          
             volumeMounts:            
+{{- if eq .Values.vaultAgent.mode "vault" }}          
                 - mountPath: /vault
                   name: vault-token
-{{ end }}                  
+{{- end }}   
+{{- if ne .Values.alcide.advisorProfileFile "" }}
+                - mountPath: /advisor-profile
+                  name: advisor-profile
+{{- end }}               
             args:
               - --eula-sign
               - validate
@@ -105,13 +120,13 @@ spec:
               - --inCluster
               - --outfile
               - /dev/null
-{{ if eq .Values.vaultAgent.mode "none" }}              
+{{- if eq .Values.vaultAgent.mode "none" }}              
               - --slack-api-token
               - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)
-{{ end }}                             
+{{- end }}                             
               - --slack-channel
               - {{ .Values.slack.channel | quote }}
-{{ if ne .Values.alcide.advisorProfileId "" }}
+{{- if ne .Values.alcide.advisorProfileId "" }}
               - --profile-id
               - {{ .Values.alcide.advisorProfileId | quote }}  
               - --organization
@@ -120,19 +135,25 @@ spec:
               - {{ .Values.alcide.apiServer | quote }}
               - --alcide-api-key
               - $(ALCIDE_API_KEY)                      
-{{ end }} 
-{{ if ne .Values.s3.s3Url "" }}
+{{- end }} 
+{{- if ne .Values.alcide.advisorProfileFile "" }}
+              - --policy-profile
+              - /advisor-profile/profile.advisor 
+              - --alcide-api-key
+              - $(ALCIDE_API_KEY)                      
+{{- end }}
+{{- if ne .Values.s3.s3Url "" }}
               - --s3-export-url
               - {{ .Values.s3.s3Url | quote }}
-{{ end }}     
-{{ if ne .Values.prometheus.pushGateway "" }}
+{{- end }}     
+{{- if ne .Values.prometheus.pushGateway "" }}
               - --prom-push-gateway
               - {{ .Values.prometheus.pushGateway | quote }}
-{{ end }}
-{{ if ne .Values.vaultAgent.mode "none" }}
+{{- end }}
+{{- if ne .Values.vaultAgent.mode "none" }}
               - --config 
               - /vault/secrets/alcide-advisor.yaml
-{{ end }}
+{{- end }}
               #- --debug
             securityContext:
               allowPrivilegeEscalation: false
@@ -147,32 +168,32 @@ spec:
               - name: ALCIDE_API_KEY
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: {{ template "alcide-advisor.fullname" . }}-exports
                     key: alcideApiKey           
               - name: ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: {{ template "alcide-advisor.fullname" . }}-exports
                     key: slackApiToken
               - name: ALCIDE_ADVISOR_EXPORT_AWS_ACCESS_KEY_ID
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: {{ template "alcide-advisor.fullname" . }}-exports
                     key: awsAccessKeyId
               - name: ALCIDE_ADVISOR_EXPORT_AWS_SECRET_KEY
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: {{ template "alcide-advisor.fullname" . }}-exports
                     key: awsSecretKey 
               - name: ALCIDE_ADVISOR_EXPORT_PROM_USERNAME
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: {{ template "alcide-advisor.fullname" . }}-exports
                     key: promPushGatewayUsername 
               - name: ALCIDE_ADVISOR_EXPORT_PROM_PASSWORD
                 valueFrom:
                   secretKeyRef:
-                    name: alcide-advisor-exports
+                    name: {{ template "alcide-advisor.fullname" . }}-exports
                     key: promPushGatewayPassword 
 {{ end }}                      
           restartPolicy: OnFailure

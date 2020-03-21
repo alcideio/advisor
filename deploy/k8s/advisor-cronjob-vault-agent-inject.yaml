@@ -9,14 +9,14 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: alcide-advisor
+  name: blueprintscan-alcide-advisor-cronjob
   namespace: alcide-advisor
 ---
 # Source: alcide-advisor-cronjob/templates/rbac.yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: alcide-advisor
+  name: blueprintscan-alcide-advisor-cronjob
 rules:
   - apiGroups: ["*"]
     resources: ["*"]
@@ -32,22 +32,28 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: alcide-advisor-binding
+  name: blueprintscan-alcide-advisor-cronjob-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: alcide-advisor
+  name: blueprintscan-alcide-advisor-cronjob
 subjects:
   - kind: ServiceAccount
-    name: alcide-advisor
+    name: blueprintscan-alcide-advisor-cronjob
     namespace: alcide-advisor
 ---
 # Source: alcide-advisor-cronjob/templates/advisorjob.yaml
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: alcide-advisor
+  name: blueprintscan-alcide-advisor-cronjob
   namespace: alcide-advisor
+  labels:
+    app.kubernetes.io/name: alcide-advisor-cronjob
+    helm.sh/chart: alcide-advisor-cronjob-2.0.1
+    app.kubernetes.io/instance: blueprintscan
+    app.kubernetes.io/version: "2.11.1"
+    app.kubernetes.io/managed-by: Helm
 spec:
   schedule: "*/1 * * * *"
   # Keep the last run 
@@ -91,40 +97,32 @@ spec:
               {{- end }}
 
         spec:
-          serviceAccountName: alcide-advisor
-
+          serviceAccountName: blueprintscan-alcide-advisor-cronjob
+          volumes:
           containers:
           - name: advisor
             #
             # For debugging Vault injection ... going away soooooon
             #
-#             imagePullPolicy: IfNotPresent
-#             image: nginx
-#             command: ["nginx", "-g", "daemon off;"]
-#              
+            #imagePullPolicy: IfNotPresent
+            #image: nginx
+            #command: ["nginx", "-g", "daemon off;"]             
             image: alcidelabs/advisor:2.11.0-vault
             imagePullPolicy: Always
-                  
+            volumeMounts:               
             args:
               - --eula-sign
               - validate
               - cluster
               - --inCluster
               - --outfile
-              - /dev/null
-                             
+              - /dev/null                             
               - --slack-channel
               - "@someuser"
- 
-
               - --s3-export-url
               - "s3://mybucket/subdir?region=us-west-2"
-     
-
-
               - --config 
               - /vault/secrets/alcide-advisor.yaml
-
               #- --debug
             securityContext:
               allowPrivilegeEscalation: false
