@@ -18,7 +18,7 @@ jobs:
         with:
           version: v0.7.0
           name: kruzer
-          node_image: kindest/node:${{ matrix.config.kubever }}
+          node_image: kindest/node:v1.16.4
           wait: 5m
           install_local_path_provisioner: true
 
