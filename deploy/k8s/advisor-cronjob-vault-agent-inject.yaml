@@ -3,14 +3,14 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: blueprintscan-alcide-advisor-cronjob
+  name: alcide-advisor-cronjob-blueprintscan
   namespace: alcide-advisor
 ---
 # Source: alcide-advisor-cronjob/templates/rbac.yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: blueprintscan-alcide-advisor-cronjob
+  name: alcide-advisor-cronjob-blueprintscan
 rules:
   - apiGroups: ["*"]
     resources: ["*"]
@@ -26,21 +26,21 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: blueprintscan-alcide-advisor-cronjob-binding
+  name: alcide-advisor-cronjob-blueprintscan-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: blueprintscan-alcide-advisor-cronjob
+  name: alcide-advisor-cronjob-blueprintscan
 subjects:
   - kind: ServiceAccount
-    name: blueprintscan-alcide-advisor-cronjob
+    name: alcide-advisor-cronjob-blueprintscan
     namespace: alcide-advisor
 ---
 # Source: alcide-advisor-cronjob/templates/advisorjob.yaml
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: blueprintscan-alcide-advisor-cronjob
+  name: alcide-advisor-cronjob-blueprintscan
   namespace: alcide-advisor
   labels:
     app.kubernetes.io/name: alcide-advisor-cronjob
@@ -91,7 +91,7 @@ spec:
               {{- end }}
 
         spec:
-          serviceAccountName: blueprintscan-alcide-advisor-cronjob
+          serviceAccountName: alcide-advisor-cronjob-blueprintscan
           volumes:
           containers:
           - name: advisor

@@ -1,4 +1,4 @@
-name: Test Alcide kAudit Chart
+name: Test Alcide Advisor Helm Chart
 
 on:
   push:
