@@ -5,14 +5,10 @@ on:
     branches:
       - '*'
 
-jobs:
-  advisor-tests:
-    name: advisor-test on k8s ${{ matrix.config.kubever }}
+jobs:  
+  scan-tests:
+    name: Alcide Advisor on Kubernetes ${{ matrix.config.kubever }}
     runs-on: ubuntu-latest
-
-  # env:
-  #   CTEST_OUTPUT_ON_FAILURE: ON
-
     strategy:
       fail-fast: false
       matrix:

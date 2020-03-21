@@ -24,8 +24,12 @@ cronSchedule: "*/1 * * * *"
 alcide:
   orgId: yourorg
   apiServer: 
+  # Obtain an API Key from your Alcide Cloud Account
   apiKey: 
+  # Either use a profile id or use the profile exported to file
   advisorProfileId: ""
+  advisorProfileFile: ""
+
 
 slack:
   #<Your_Slack_Channel>
