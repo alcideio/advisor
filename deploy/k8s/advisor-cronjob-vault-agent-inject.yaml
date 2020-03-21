@@ -1,10 +1,4 @@
 ---
-# Source: alcide-advisor-cronjob/templates/namespace.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: alcide-advisor
----
 # Source: alcide-advisor-cronjob/templates/rbac.yaml
 apiVersion: v1
 kind: ServiceAccount

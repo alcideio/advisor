@@ -15,7 +15,7 @@ K8S_DEPLOYMENT_FILES = deploy/k8s
 
 gen-k8s-deploy-advisor-local-profile: ##@Build Generate k8s deployment files from the helm chart
 	mkdir -p $(K8S_DEPLOYMENT_FILES)
-	helm template  appconfigscan deploy/charts/alcide-advisor-cronjob \
+	helm template  -n alcide-advisor appconfigscan deploy/charts/alcide-advisor-cronjob \
 		--set vaultAgent.mode=none \
 		--set alcide.advisorProfileFile=advisor-profiles/alcide-kubernetes-assessment.advisor \
 		--set image.alcideAdvisor=alcide/advisor:stable   > $(K8S_DEPLOYMENT_FILES)/advisor-cronjob-local-profile.yaml
@@ -23,19 +23,19 @@ gen-k8s-deploy-advisor-local-profile: ##@Build Generate k8s deployment files fro
 
 gen-k8s-deploy-advisor: ##@Build Generate k8s deployment files from the helm chart
 	mkdir -p $(K8S_DEPLOYMENT_FILES)
-	helm template  kubecve deploy/charts/alcide-advisor-cronjob \
+	helm template  -n alcide-advisor kubecve deploy/charts/alcide-advisor-cronjob \
 		--set vaultAgent.mode=none \
 		--set image.alcideAdvisor=alcide/advisor:stable   > $(K8S_DEPLOYMENT_FILES)/advisor-cronjob.yaml
 
 gen-k8s-deploy-advisor-with-vault: ##@Build Generate k8s deployment files from the helm chart for Vault
 	mkdir -p $(K8S_DEPLOYMENT_FILES)
-	helm template  opseval deploy/charts/alcide-advisor-cronjob \
+	helm template  -n alcide-advisor opseval deploy/charts/alcide-advisor-cronjob \
 		--set vaultAgent.mode=vault \
 		--set image.alcideAdvisor=alcidelabs/advisor:2.11.0-vault > $(K8S_DEPLOYMENT_FILES)/advisor-cronjob-vault.yaml
 
 gen-k8s-deploy-advisor-with-vault-agent-inject: ##@Build Generate k8s deployment files from the helm chart for Vault with Agent Inject
 	mkdir -p $(K8S_DEPLOYMENT_FILES)
-	helm template  blueprintscan deploy/charts/alcide-advisor-cronjob \
+	helm template  -n alcide-advisor blueprintscan deploy/charts/alcide-advisor-cronjob \
 		--set vaultAgent.mode=agent-inject \
 		--set image.alcideAdvisor=alcidelabs/advisor:2.11.0-vault  > $(K8S_DEPLOYMENT_FILES)/advisor-cronjob-vault-agent-inject.yaml
 
