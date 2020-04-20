@@ -60,7 +60,7 @@ metadata:
   namespace: alcide-advisor
   labels:
     app.kubernetes.io/name: alcide-advisor-cronjob
-    helm.sh/chart: alcide-advisor-cronjob-2.0.1
+    helm.sh/chart: alcide-advisor-cronjob-2.1.0
     app.kubernetes.io/instance: kubecve
     app.kubernetes.io/version: "2.11.1"
     app.kubernetes.io/managed-by: Helm
