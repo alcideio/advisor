@@ -15,7 +15,6 @@ With Alcide Advisor, you can cover the following security checks:
 - Kubernetes operators security best practices.
 - Deployment conformance to labeling, annotating, resource limits and much more ...
 
-[VIDEO: Alcide Advisor Overview](https://youtu.be/UXNPMzCtG84)
 
 ## Pipeline Integrations
 
@@ -38,17 +37,12 @@ An example of a serious vulnerability that was recently found is the privilege e
 
 `Alcide Advisor` scans your cluster for known vulnerabilities on the master API server and worker node components, including container runtime. This has great benefit for teams using both managed clusters like Kops, AKS-Engine or the managed kubernetes services like AKS.
 
-### App-Formation
-The App-formation feature ([requires regsitration](https://www.alcide.io/advisor-free-trial/)) allows you to create a baseline profile on a specific cluster, and get scan results only on issues that deviate from the baseline. This helps DevOps focus on relevant issues and assets that require attention.
-
-
 ## Feedback and issues
 
 If you have feedback or issues, submit a github issue
 
-## Free-Forever
+## Get a free-forever account
 
 ![Alcide Kubernetes Advisor](https://d2908q01vomqb2.cloudfront.net/77de68daecd823babbb58edb1c8e14d7106e83bb/2019/06/19/Alcide-Advisor-Amazon-EKS-1.png "Alcide Kubernetes Advisor")
 
-To get a tailor made exprience with **Alcide Kubernetes Advisor** - create your account [now](https://www.alcide.io/advisor-free-trial/) 
-or, [request a demo](https://get.alcide.io/request-demo)
+To get a tailor made exprience with **Alcide Kubernetes Advisor** start your risk-free [trial now](https://www.alcide.io/advisor-free-trial/)
