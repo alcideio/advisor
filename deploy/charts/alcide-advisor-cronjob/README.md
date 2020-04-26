@@ -21,7 +21,7 @@ With Alcide Advisor, you can cover the following security checks:
 
 Alcide Kubernetes Advisor integration examples into CI+**CD** can be found in [alcideio/pipeline](https://github.com/alcideio/pipeline)
 
-## Use Case Examples
+## Use Case Examples 
 
 ### Hunting Misplaced Secrets, or Excessive Secret Access
 The Kubernetes secret object is designed to store and manage sensitive information, such as passwords, OAuth tokens, and SSH keys. Placing this information in plain text or in the wild (such as config maps) makes it easily exposed to unauthorized users, and is a greater risk for your Kubernetes and cloud provider environments.
@@ -50,5 +50,4 @@ If you have feedback or issues, submit a github issue
 
 ![Alcide Kubernetes Advisor](https://d2908q01vomqb2.cloudfront.net/77de68daecd823babbb58edb1c8e14d7106e83bb/2019/06/19/Alcide-Advisor-Amazon-EKS-1.png "Alcide Kubernetes Advisor")
 
-To fully unlock Alcide Kubernetes Advisor create your ![free-forever account](https://www.alcide.io/pricing#free-forever)
-
+To unlock your Alcide Kubernetes Advisor create your ![free-forever account](https://www.alcide.io/pricing#free-forever)

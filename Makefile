@@ -7,14 +7,23 @@ VERSION ?= 1.0.0
 .phony: help
 
 get-deps: ##@Install Dependencies Linux
+	@echo Install helm 3
 	curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 
 	chmod 700 get_helm.sh 
 	./get_helm.sh
+	@echo Install Spell Checker
+	mkdir -p bin && curl -L -o bin/install-misspell.sh https://git.io/misspell && sh bin/install-misspell.sh
 
 K8S_DEPLOYMENT_FILES = deploy/k8s
 
-lint-chart: ##@Test Lint Helm Chart
+lint-misspell:	##@Lint Generate k8s deployment files from the helm chart for Vault with Agent Inject
+	@echo Running spell checker ...
+	bash -c "find . -type f -name '*.md' -exec bin/misspell -w -error {} \;"
+
+lint-chart: ##@Lint Lint Helm Chart
 	helm lint deploy/charts/alcide-advisor-cronjob
+
+lint: 	lint-chart lint-misspell ##@Lint Run all lint targets
 
 gen-k8s-deploy-advisor-local-profile: ##@Build Generate k8s deployment files from the helm chart
 	mkdir -p $(K8S_DEPLOYMENT_FILES)

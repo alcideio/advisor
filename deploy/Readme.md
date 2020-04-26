@@ -65,7 +65,7 @@ this example make use of Vault installed in cluster.
      policies=alcide-advisor \
      ttl=1h
   ```
-  4. put a key/value entry in vault, with AWS credencials (and potentially other integrations). <br />
+  4. put a key/value entry in vault, with AWS credentials (and potentially other integrations). <br />
   replace the s3KeyId and s3AwsSecretAccessKey with actual vlaues
   ```
   vault kv put secret/alcide/advisor \
