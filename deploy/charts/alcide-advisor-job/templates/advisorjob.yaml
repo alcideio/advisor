@@ -1,54 +1,50 @@
 ---
-apiVersion: batch/v1beta1
-kind: CronJob
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: {{ template "alcide-advisor.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "alcide-advisor.labels" . | indent 4 }}
-spec:
-  schedule: {{ .Values.cronSchedule | quote }}
-  # Keep the last run 
-  successfulJobsHistoryLimit: 1
-  failedJobsHistoryLimit: 1  
-  # Concurrency is not required
-  concurrencyPolicy: Forbid
-
-  jobTemplate:
-    spec:
-      template:
-        metadata:
-          annotations:
-            alcide.io/advisor: "cronjob" 
+  annotations:
+    alcide.io/advisor: "job" 
+{{- if eq .Values.gitOps.platform "argocd" }}    
+    argocd.argoproj.io/sync-wave: "99"
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+{{- end }}    
 {{ if eq .Values.vaultAgent.mode "agent-inject" }}
-            vault.hashicorp.com/agent-inject: "true"
-            vault.hashicorp.com/role: "alcide-advisor"
-            vault.hashicorp.com/agent-pre-populate-only: "true"
-            vault.hashicorp.com/agent-inject-secret-alcide-advisor.yaml: "secret/alcide/advisor"
-            vault.hashicorp.com/agent-inject-template-alcide-advisor.yaml: |
-              Exports:
-              {{"{{- with secret \"secret/alcide/advisor\" -}}"}}   
-                {{"{{- if  .Data.data.prometheusUsername }}"}}
-                prometheusPassword: {{"{{ .Data.data.prometheusPassword }}"}}
-                prometheusUsername: {{"{{ .Data.data.prometheusUsername }}"}}
-                {{"{{- end }}"}}      
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: "alcide-advisor"
+    vault.hashicorp.com/agent-pre-populate-only: "true"
+    vault.hashicorp.com/agent-inject-secret-alcide-advisor.yaml: "secret/alcide/advisor"
+    vault.hashicorp.com/agent-inject-template-alcide-advisor.yaml: |
+      Exports:
+      {{"{{- with secret \"secret/alcide/advisor\" -}}"}}   
+        {{"{{- if  .Data.data.prometheusUsername }}"}}
+        prometheusPassword: {{"{{ .Data.data.prometheusPassword }}"}}
+        prometheusUsername: {{"{{ .Data.data.prometheusUsername }}"}}
+        {{"{{- end }}"}}      
 
-                {{"{{- if .Data.data.s3AwsAccessKeyId }}"}}  
-                s3AwsAccessKeyId: {{"{{ .Data.data.s3AwsAccessKeyId }}"}}
-                s3AwsSecretAccessKey: {{"{{ .Data.data.s3AwsSecretAccessKey }}"}}
-                {{"{{- end }}"}}  
+        {{"{{- if .Data.data.s3AwsAccessKeyId }}"}}  
+        s3AwsAccessKeyId: {{"{{ .Data.data.s3AwsAccessKeyId }}"}}
+        s3AwsSecretAccessKey: {{"{{ .Data.data.s3AwsSecretAccessKey }}"}}
+        {{"{{- end }}"}}  
 
-                {{"{{- if .Data.data.slackApiToken }}"}}  
-                slackApiToken: {{"{{ .Data.data.slackApiToken }}"}}
-                {{"{{- end }}"}}   
+        {{"{{- if .Data.data.slackApiToken }}"}}  
+        slackApiToken: {{"{{ .Data.data.slackApiToken }}"}}
+        {{"{{- end }}"}}   
 
-                {{"{{- if  .Data.data.alcideApiKey }}"}}             
-              Profile:
-                alcideApiKey: {{"{{ .Data.data.alcideApiKey }}"}}
-                {{"{{- end }}"}}   
-              {{"{{- end }}"}}
+        {{"{{- if  .Data.data.alcideApiKey }}"}}             
+      Profile:
+        alcideApiKey: {{"{{ .Data.data.alcideApiKey }}"}}
+        {{"{{- end }}"}}   
+      {{"{{- end }}"}}
 {{ end }}
-        spec:
+spec:
+    backoffLimit: 1
+    template:
+      spec:
           serviceAccountName: {{ template "alcide-advisor.fullname" . }}
           volumes:
 {{- if ne .Values.alcide.advisorProfileFile "" }}
@@ -120,6 +116,10 @@ spec:
               - --inCluster
               - --outfile
               - /dev/null
+{{- if .Values.failJobOnCritical }}              
+              - --run-mode
+              - pipeline
+{{- end }}  
 {{- if eq .Values.vaultAgent.mode "none" }}              
               - --slack-api-token
               - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)
@@ -195,5 +195,9 @@ spec:
                   secretKeyRef:
                     name: {{ template "alcide-advisor.fullname" . }}-exports
                     key: promPushGatewayPassword 
-{{ end }}                      
+{{ end }}   
+{{- if .Values.failJobOnCritical }}                    
+          restartPolicy: Never
+{{- else }}
           restartPolicy: OnFailure
+{{- end  }}

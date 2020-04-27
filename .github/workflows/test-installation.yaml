@@ -1,4 +1,4 @@
-name: Test Alcide Advisor Helm Chart
+name: Test Alcide Advisor Helm Charts
 
 on:
   push:
@@ -28,20 +28,33 @@ jobs:
           chmod 700 get_helm.sh
           ./get_helm.sh          
 
-
-      - name: Test Installations 
+      - name: Prepare Namespaces 
         run: |
-          #kubectl create ns alcide-advisor
-
           kubectl create ns alcide-advisor
+          
 
-          echo "Installing Alcide Advisor with Exported Profile"
+      - name: Test Advisor CronJob 
+        run: |
+          echo "Installing Alcide Advisor CronJob with Exported Profile"
           helm upgrade -i -n alcide-advisor --wait  exportedprofile deploy/charts/alcide-advisor-cronjob          
 
-          echo "Installing Alcide Advisor"
+          echo "Installing Alcide Advisor CronJob"
           helm upgrade -i -n alcide-advisor --wait  scan deploy/charts/alcide-advisor-cronjob \
               --set alcide.advisorProfileFile=advisor-profiles/alcide-kubernetes-assessment.advisor 
  
           kubectl -n alcide-advisor get cronjobs
           kubectl -n alcide-advisor describe cronjobs
+
+      - name: Test Advisor Job 
+        run: |
+
+          echo "Installing Alcide Advisor Job with Exported Profile"
+          helm upgrade -i -n alcide-advisor --wait  scanjob deploy/charts/alcide-advisor-job          
+
+          echo "Installing Alcide Advisor"
+          helm upgrade -i -n alcide-advisor --wait  argocd deploy/charts/alcide-advisor-cronjob \
+              --set alcide.advisorProfileFile=advisor-profiles/alcide-kubernetes-assessment.advisor 
+ 
+          kubectl -n alcide-advisor get jobs
+          kubectl -n alcide-advisor describe jobs
 
