@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: advisor-policy-{{ .Values.alcide.advisorProfileFile | sha256sum | trunc 5 }}
+  name: {{ template "alcide-advisor.fullname" . }}-policy
   namespace: {{ .Release.Namespace }}
 data:
   profile.advisor: |

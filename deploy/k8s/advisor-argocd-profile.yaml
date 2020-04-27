@@ -71,6 +71,7 @@ metadata:
     argocd.argoproj.io/hook-delete-policy: HookSucceeded    
 
 spec:
+    backoffLimit: 1
     template:
       spec:
           serviceAccountName: alcide-advisor-job-argocd-security-hook

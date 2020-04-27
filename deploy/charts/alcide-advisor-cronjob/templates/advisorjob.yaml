@@ -58,7 +58,7 @@ spec:
                 items:
                   - key: profile.advisor
                     path: profile.advisor
-                name: advisor-policy-{{ .Values.alcide.advisorProfileFile | sha256sum | trunc 5 }}                         
+                name: {{ template "alcide-advisor.fullname" . }}-policy                         
 {{- end }}                      
 {{- if eq .Values.vaultAgent.mode "vault" }}       
             - emptyDir:
