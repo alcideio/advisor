@@ -1,0 +1,152 @@
+---
+# Source: alcide-advisor-job/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alcide-advisor-job-argocd-security-hook
+  namespace: alcide-advisor
+---
+# Source: alcide-advisor-job/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alcide-advisor-job-argocd-security-hook-exports
+  namespace: alcide-advisor
+type: Opaque
+data:
+  alcideApiKey: "TXlBcGlLZXlGcm9tTXlBbGNpZGVBY2NvdW50"
+  slackApiToken: ""
+  awsAccessKeyId:  ""
+  awsSecretKey: ""
+
+  promPushGatewayUsername: ""
+  promPushGatewayPassword: ""
+---
+# Source: alcide-advisor-job/templates/rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: alcide-advisor-job-argocd-security-hook
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["proxy"]    
+  - apiGroups: ["authorization.k8s.io"]
+    resources: ["subjectaccessreviews"]
+    verbs: ["create"]
+---
+# Source: alcide-advisor-job/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: alcide-advisor-job-argocd-security-hook-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: alcide-advisor-job-argocd-security-hook
+subjects:
+  - kind: ServiceAccount
+    name: alcide-advisor-job-argocd-security-hook
+    namespace: alcide-advisor
+---
+# Source: alcide-advisor-job/templates/advisorjob.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: alcide-advisor-job-argocd-security-hook
+  namespace: alcide-advisor
+  labels:
+    app.kubernetes.io/name: alcide-advisor-job
+    helm.sh/chart: alcide-advisor-job-1.0.0
+    app.kubernetes.io/instance: argocd-security-hook
+    app.kubernetes.io/version: "2.12.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    alcide.io/advisor: "job"    
+    argocd.argoproj.io/sync-wave: "99"
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded    
+
+spec:
+    template:
+      spec:
+          serviceAccountName: alcide-advisor-job-argocd-security-hook
+          volumes:
+          containers:
+          - name: advisor
+            #
+            # For debugging Vault injection ... going away soooooon
+            #
+            #imagePullPolicy: IfNotPresent
+            #image: nginx
+            #command: ["nginx", "-g", "daemon off;"]             
+            image: alcide/advisor:stable
+            imagePullPolicy: Always
+            volumeMounts:               
+            args:
+              - --eula-sign
+              - validate
+              - cluster
+              - --inCluster
+              - --outfile
+              - /dev/null              
+              - --run-mode
+              - pipeline              
+              - --slack-api-token
+              - $(ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN)                             
+              - --slack-channel
+              - "@someuser"
+              - --profile-id
+              - "11111111-1111-1111-aaaa-bbbbbbbbbbbb"  
+              - --organization
+              - "myaccount"
+              - --alcide-api-server
+              - "myaccount.cloud.alcide.io"
+              - --alcide-api-key
+              - $(ALCIDE_API_KEY)
+              #- --debug
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+              runAsNonRoot: true
+              runAsUser: 10001
+              readOnlyRootFilesystem: true
+            
+            env:
+              - name: ALCIDE_API_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-job-argocd-security-hook-exports
+                    key: alcideApiKey           
+              - name: ALCIDE_ADVISOR_EXPORT_SLACK_API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-job-argocd-security-hook-exports
+                    key: slackApiToken
+              - name: ALCIDE_ADVISOR_EXPORT_AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-job-argocd-security-hook-exports
+                    key: awsAccessKeyId
+              - name: ALCIDE_ADVISOR_EXPORT_AWS_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-job-argocd-security-hook-exports
+                    key: awsSecretKey 
+              - name: ALCIDE_ADVISOR_EXPORT_PROM_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-job-argocd-security-hook-exports
+                    key: promPushGatewayUsername 
+              - name: ALCIDE_ADVISOR_EXPORT_PROM_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: alcide-advisor-job-argocd-security-hook-exports
+                    key: promPushGatewayPassword 
+                    
+          restartPolicy: Never

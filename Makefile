@@ -20,10 +20,22 @@ lint-misspell:	##@Lint Generate k8s deployment files from the helm chart for Vau
 	@echo Running spell checker ...
 	bash -c "find . -type f -name '*.md' -exec bin/misspell -w -error {} \;"
 
-lint-chart: ##@Lint Lint Helm Chart
+lint-charts: ##@Lint Lint Helm Chart
 	helm lint deploy/charts/alcide-advisor-cronjob
+	helm lint deploy/charts/alcide-advisor-job
 
-lint: 	lint-chart lint-misspell ##@Lint Run all lint targets
+lint: 	lint-charts lint-misspell ##@Lint Run all lint targets
+
+gen-k8s-deploy-advisor-argocd: ##@Build Generate k8s deployment files from the helm chart
+	mkdir -p $(K8S_DEPLOYMENT_FILES)
+	helm template  -n alcide-advisor argocd-security-hook deploy/charts/alcide-advisor-job \
+		--set vaultAgent.mode=none \
+		--set alcide.orgId=myaccount \
+		--set alcide.apiServer=myaccount.cloud.alcide.io \
+		--set alcide.apiKey=MyApiKeyFromMyAlcideAccount \
+		--set alcide.advisorProfileId="11111111-1111-1111-aaaa-bbbbbbbbbbbb" \
+		--set gitOps.platform=argocd > $(K8S_DEPLOYMENT_FILES)/advisor-argocd-profile.yaml
+
 
 gen-k8s-deploy-advisor-local-profile: ##@Build Generate k8s deployment files from the helm chart
 	mkdir -p $(K8S_DEPLOYMENT_FILES)
@@ -52,8 +64,10 @@ gen-k8s-deploy-advisor-with-vault-agent-inject: ##@Build Generate k8s deployment
 		--set image.alcideAdvisor=alcidelabs/advisor:2.11.0-vault  > $(K8S_DEPLOYMENT_FILES)/advisor-cronjob-vault-agent-inject.yaml
 
 
-gen-k8s-deploy-all: lint-chart gen-k8s-deploy-advisor-local-profile gen-k8s-deploy-advisor gen-k8s-deploy-advisor-with-vault gen-k8s-deploy-advisor-with-vault-agent-inject ##@Build Generate k8s deployment files from the helm chart
-    
+gen-k8s-deploy-all: lint-charts gen-k8s-deploy-advisor-argocd
+gen-k8s-deploy-all: gen-k8s-deploy-advisor-local-profile 
+gen-k8s-deploy-all: gen-k8s-deploy-advisor gen-k8s-deploy-advisor-with-vault    
+gen-k8s-deploy-all: gen-k8s-deploy-advisor-with-vault-agent-inject ##@Build Generate k8s deployment files from the helm chart
 
 HELP_FUN = \
          %help; \
