@@ -8,7 +8,7 @@ metadata:
 ---
 # Source: alcide-advisor-cronjob/templates/rbac.yaml
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: alcide-advisor-cronjob-blueprintscan
 rules:
@@ -23,7 +23,7 @@ rules:
     verbs: ["create"]
 ---
 # Source: alcide-advisor-cronjob/templates/rbac.yaml
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: alcide-advisor-cronjob-blueprintscan-binding
