@@ -45,10 +45,3 @@ The App-formation feature ([requires regsitration](https://www.alcide.io/advisor
 ## Feedback and issues
 
 If you have feedback or issues, submit a github issue
-
-## Free-Forever
-
-![Alcide Kubernetes Advisor](https://d2908q01vomqb2.cloudfront.net/77de68daecd823babbb58edb1c8e14d7106e83bb/2019/06/19/Alcide-Advisor-Amazon-EKS-1.png "Alcide Kubernetes Advisor")
-
-To fully unlock Alcide Kubernetes Advisor create your ![free-forever account](https://www.alcide.io/pricing#free-forever)
-
